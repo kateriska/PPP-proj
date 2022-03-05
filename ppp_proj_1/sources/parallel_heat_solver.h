@@ -26,13 +26,13 @@ class ParallelHeatSolver : public BaseHeatSolver
     // - Constructor which passes SimulationProperties and MaterialProperties
     //   to the base class. (see below)
     // - Implementation of RunSolver method. (see below)
-    // 
-    // It is strongly encouraged to define methods and member variables to improve 
+    //
+    // It is strongly encouraged to define methods and member variables to improve
     // readability of your code!
     //
     //                             *** END: NOTE ***
     //============================================================================//
-    
+
 public:
     /**
      * @brief Constructor - Initializes the solver. This should include things like:
@@ -61,6 +61,9 @@ public:
 protected:
     int m_rank;     ///< Process rank in global (MPI_COMM_WORLD) communicator.
     int m_size;     ///< Total number of processes in MPI_COMM_WORLD.
+
+    AutoHandle<hid_t> m_fileHandle;                             ///< Output HDF5 file handle.
+    std::vector<float, AlignedAllocator<float> > m_tempArray;
 };
 
 #endif // PARALLEL_HEAT_SOLVER_H

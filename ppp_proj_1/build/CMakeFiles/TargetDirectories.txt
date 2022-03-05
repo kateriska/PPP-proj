@@ -1,0 +1,6 @@
+/home/katerina/Documents/PPP-proj/ppp_proj_1/build/CMakeFiles/ppp_proj01.dir
+/home/katerina/Documents/PPP-proj/ppp_proj_1/build/CMakeFiles/data_generator.dir
+/home/katerina/Documents/PPP-proj/ppp_proj_1/build/CMakeFiles/test.dir
+/home/katerina/Documents/PPP-proj/ppp_proj_1/build/CMakeFiles/pack.dir
+/home/katerina/Documents/PPP-proj/ppp_proj_1/build/CMakeFiles/edit_cache.dir
+/home/katerina/Documents/PPP-proj/ppp_proj_1/build/CMakeFiles/rebuild_cache.dir

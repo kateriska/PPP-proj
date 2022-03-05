@@ -26,6 +26,7 @@ set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${OpenMP_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
 set(HDF5_PREFER_PARALLEL ON)
+set(HDF5_DIR, /home/katerina/Documents/hdf5-1.12.1/hdf5)
 find_package(HDF5 COMPONENTS C HL REQUIRED)
 include_directories(${HDF5_INCLUDE_DIRS})
 link_directories(${HDF5_LIBRARY_DIRS})
