@@ -325,4 +325,15 @@ CMakeFiles/ppp_proj01.dir/main.cpp.o: \
  /usr/include/c++/9/bits/stl_bvector.h /usr/include/c++/9/bits/vector.tcc \
  /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/simulation_properties.h \
  /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/sequential_heat_solver.h \
- /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/parallel_heat_solver.h
+ /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/parallel_heat_solver.h \
+ /usr/include/c++/9/cmath /usr/include/math.h \
+ /usr/include/x86_64-linux-gnu/bits/math-vector.h \
+ /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
+ /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h \
+ /usr/include/x86_64-linux-gnu/bits/fp-logb.h \
+ /usr/include/x86_64-linux-gnu/bits/fp-fast.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h \
+ /usr/include/x86_64-linux-gnu/bits/iscanonical.h \
+ /usr/include/x86_64-linux-gnu/bits/mathinline.h
