@@ -88,8 +88,13 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       m_simulationProperties.GetDecompGrid(outSizeX, outSizeY);
       local_tile_size_x = sqrt(m_materialProperties.GetInitTemp().size()) / outSizeX;
       local_tile_size_y = sqrt(m_materialProperties.GetInitTemp().size()) / outSizeY;
+      cout << local_tile_size_x << endl;
+      cout << local_tile_size_y << endl;
       local_tile_size = local_tile_size_x * local_tile_size_y;
       domain_length = m_materialProperties.GetInitTemp().size();
+
+      // compute position of each process in grid
+      // 0 - left upper corner
 
     }
     MPI_Bcast(&outSizeX, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -97,39 +102,100 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     MPI_Bcast(&local_tile_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&domain_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
     cout << local_tile_size << endl;
+
     vector<float> init_temp;
+    vector<float> tmp_vector;
+    vector<float> out_result;
+    vector<int> domain_map;
+    vector<float> domain_params;
 
     if (m_rank == 0)
     {
     for (size_t i = 0; i < m_materialProperties.GetInitTemp().size(); ++i) {
         init_temp.push_back(m_materialProperties.GetInitTemp().at(i));
     }
+    for (size_t i = 0; i < m_materialProperties.GetDomainParams().size(); ++i) {
+        domain_params.push_back(m_materialProperties.GetDomainParams().at(i));
     }
+
+    for (size_t i = 0; i < m_materialProperties.GetDomainMap().size(); ++i) {
+        domain_map.push_back(m_materialProperties.GetDomainMap().at(i));
+    }
+    }
+
 
     string vector_res = "";
     cout << m_rank << endl;
-    for (size_t i = 0; i < init_temp.size(); ++i)
+    for (size_t i = 0; i < domain_map.size(); ++i)
     {
-      int item = init_temp.at(i);
+      int item = domain_map.at(i);
       vector_res.append(to_string(item));
       vector_res.append(", ");
     }
+
+
     cout << vector_res << endl;
     MPI_Barrier(MPI_COMM_WORLD);
+
     vector<float> init_temp_local(local_tile_size);
+    vector<float> tmp_vector_local(local_tile_size);
+    vector<float> out_result_local(local_tile_size);
+    vector<int> domain_map_local(local_tile_size);
+    vector<float> domain_params_local(local_tile_size);
+
     cout << init_temp_local.data() <<endl;
-    int res = MPI_Scatter(init_temp.data(), local_tile_size, MPI_FLOAT,  init_temp_local.data(), local_tile_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
-    cout << res << endl;
+    MPI_Scatter(init_temp.data(), local_tile_size, MPI_FLOAT,  init_temp_local.data(), local_tile_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
+    MPI_Scatter(domain_params.data(), local_tile_size, MPI_FLOAT,  domain_params_local.data(), local_tile_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
+    MPI_Scatter(domain_map.data(), local_tile_size, MPI_INT,  domain_map_local.data(), local_tile_size, MPI_INT, 0, MPI_COMM_WORLD);
+    //MPI_Scatter(tmp_vector.data(), local_tile_size, MPI_FLOAT,  tmp_vector_local.data(), local_tile_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
+    //MPI_Scatter(out_result.data(), local_tile_size, MPI_FLOAT,  out_result_local.data(), local_tile_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
+
 
     vector_res = "";
     cout << m_rank << endl;
-    for (size_t i = 0; i < init_temp_local.size(); ++i)
+    for (size_t i = 0; i < domain_map_local.size(); ++i)
     {
-      int item = init_temp_local.at(i);
+      int item = domain_map_local.at(i);
       vector_res.append(to_string(item));
       vector_res.append(", ");
     }
     cout << vector_res << endl;
+
+    if (m_rank == 0)
+    {
+      double startTime = MPI_Wtime();
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    // 2. Copy initial temperature into both working arrays
+    /*
+    std::copy(init_temp_local.begin(),
+              init_temp_local.end(), m_tempArray.begin());
+    std::copy(init_temp_local.begin(),
+              init_temp_local.end(), outResult.begin());
+
+    float *workTempArrays[] = { m_tempArray.data(), outResult.data() };
+    */
+    
+    /*
+    for(size_t iter = 0; iter < m_simulationProperties.GetNumIterations(); ++iter)
+    {
+        // 4. Compute new temperature for each point in the domain (except borders)
+        // border temperatures should remain constant (plus our stencil is +/-2 points).
+        for(size_t i = 2; i < m_materialProperties.GetEdgeSize() - 2; ++i)
+        {
+            for(size_t j = 2; j < m_materialProperties.GetEdgeSize() - 2; ++j)
+            {
+                ComputePoint(workTempArrays[1], workTempArrays[0],
+                        m_materialProperties.GetDomainParams().data(),
+                        m_materialProperties.GetDomainMap().data(),
+                        i, j,
+                        m_materialProperties.GetEdgeSize(),
+                        m_simulationProperties.GetAirFlowRate(),
+                        m_materialProperties.GetCoolerTemp());
+            }
+        }
+        */
 
 
     /*
