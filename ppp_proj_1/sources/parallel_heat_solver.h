@@ -60,6 +60,9 @@ public:
      */
     virtual void RunSolver(std::vector<float, AlignedAllocator<float> > &outResult);
 
+    //vector<float> ParallelHeatSolver::SplitVector(vector<float> input_vector, int n, int size)
+
+
 protected:
     int m_rank;     ///< Process rank in global (MPI_COMM_WORLD) communicator.
     int m_size;     ///< Total number of processes in MPI_COMM_WORLD.

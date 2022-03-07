@@ -56,6 +56,37 @@ ParallelHeatSolver::~ParallelHeatSolver()
 {
 
 }
+/*
+vector<float> ParallelHeatSolver::SplitVector(vector<float> input_vector, int n, int size)
+{
+
+
+
+
+    // create an array of vectors to store the sub-vectors
+    std::vector<float> vec[size];
+
+    // each iteration of this loop process the next set of `n` elements
+    // and store it in a vector at k'th index in `vec`
+    for (int k = 0; k < size; ++k)
+    {
+        // get range for the next set of `n` elements
+        auto start_itr = std::next(v.cbegin(), k*n);
+        auto end_itr = std::next(v.cbegin(), k*n + n);
+
+        // allocate memory for the sub-vector
+        vec[k].resize(n);
+
+        // copy elements from the input range to the sub-vector
+        std::copy(start_itr, end_itr, vec[k].begin());
+    }
+
+    return vec;
+
+}
+*/
+
+
 
 void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > &outResult)
 {
@@ -111,9 +142,77 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     if (m_rank == 0)
     {
-    for (size_t i = 0; i < m_materialProperties.GetInitTemp().size(); ++i) {
-        init_temp.push_back(m_materialProperties.GetInitTemp().at(i));
+      for (size_t i = 0; i < m_materialProperties.GetInitTemp().size(); ++i) {
+        cout << m_materialProperties.GetInitTemp().at(i) << endl;
+        float value = m_materialProperties.GetInitTemp().at(i);
+        cout << endl;
+          init_temp.push_back(m_materialProperties.GetInitTemp().at(i));
+
+
+      }
+
+      //list<vector<float> >& init_temp_original(outSizeX);
+
+      int n = local_tile_size * outSizeX;
+      int size = outSizeY;
+
+      // create an array of vectors to store the sub-vectors
+    std::vector<float> init_temp_original[size];
+
+
+    // each iteration of this loop process the next set of `n` elements
+    // and store it in a vector at k'th index in `vec`
+    // https://www.techiedelight.com/split-vector-into-subvectors-cpp/
+    for (int k = 0; k < size; ++k)
+    {
+        // get range for the next set of `n` elements
+        auto start_itr = std::next(init_temp.cbegin(), k*n);
+        auto end_itr = std::next(init_temp.cbegin(), k*n + n);
+
+        // allocate memory for the sub-vector
+        init_temp_original[k].resize(n);
+
+        // code to handle the last sub-vector as it might
+        // contain fewer elements
+
+        // copy elements from the input range to the sub-vector
+        std::copy(start_itr, end_itr, init_temp_original[k].begin());
+
     }
+
+    // print the sub-vectors
+    for (int i = 0; i < size; i++) {
+
+      for (auto &i: init_temp_original[i]) {
+      std::cout << i << ' ';
+  }
+      cout << "Length of vector is " << init_temp_original[i].size() << endl;
+      std::cout << std::endl;
+    }
+
+    std::cout << std::endl;
+
+    /*
+      for (std::size_t i(0); i < expidx_size; ++i) {
+        sub_vectors.emplace_back(vec.begin() + i * subvec_size, vec.begin() + (i + 1) * subvec_size);
+      }
+      */
+    /*
+        for (j = 0; j < outSizeX; j++)
+        {
+          vector<float> currentVector = vect;
+
+          for (i = 0; i < domain_length * sqrt(m_materialProperties.GetInitTemp().size()); ++i)
+          {
+            init_temp_original.push_back(m_materialProperties.GetInitTemp().at(i));
+          }
+
+        }
+        */
+
+
+
+
     for (size_t i = 0; i < m_materialProperties.GetDomainParams().size(); ++i) {
         domain_params.push_back(m_materialProperties.GetDomainParams().at(i));
     }
@@ -176,7 +275,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     float *workTempArrays[] = { m_tempArray.data(), outResult.data() };
     */
-    
+
     /*
     for(size_t iter = 0; iter < m_simulationProperties.GetNumIterations(); ++iter)
     {
