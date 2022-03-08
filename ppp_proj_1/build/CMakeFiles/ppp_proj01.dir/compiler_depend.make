@@ -742,7 +742,12 @@ CMakeFiles/ppp_proj01.dir/main.cpp.o: /home/katerina/Documents/PPP-proj/ppp_proj
   /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
   /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h \
   /usr/include/x86_64-linux-gnu/bits/iscanonical.h \
-  /usr/include/x86_64-linux-gnu/bits/mathinline.h
+  /usr/include/x86_64-linux-gnu/bits/mathinline.h \
+  /usr/include/c++/9/algorithm \
+  /usr/include/c++/9/bits/stl_algo.h \
+  /usr/include/c++/9/bits/algorithmfwd.h \
+  /usr/include/c++/9/bits/stl_heap.h \
+  /usr/include/c++/9/bits/uniform_int_dist.h
 
 CMakeFiles/ppp_proj01.dir/material_properties.cpp.o: /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/material_properties.cpp \
   /usr/include/stdc-predef.h \
@@ -1452,7 +1457,12 @@ CMakeFiles/ppp_proj01.dir/parallel_heat_solver.cpp.o: /home/katerina/Documents/P
   /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
   /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h \
   /usr/include/x86_64-linux-gnu/bits/iscanonical.h \
-  /usr/include/x86_64-linux-gnu/bits/mathinline.h
+  /usr/include/x86_64-linux-gnu/bits/mathinline.h \
+  /usr/include/c++/9/algorithm \
+  /usr/include/c++/9/bits/stl_algo.h \
+  /usr/include/c++/9/bits/algorithmfwd.h \
+  /usr/include/c++/9/bits/stl_heap.h \
+  /usr/include/c++/9/bits/uniform_int_dist.h
 
 CMakeFiles/ppp_proj01.dir/sequential_heat_solver.cpp.o: /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/sequential_heat_solver.cpp \
   /usr/include/stdc-predef.h \
@@ -2119,13 +2129,21 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/include/c++/9/bits/sstream.tcc:
 
-/usr/include/x86_64-linux-gnu/bits/getopt_ext.h:
-
 /usr/include/x86_64-linux-gnu/bits/getopt_core.h:
 
 /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/simulation_properties.cpp:
 
 /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/parallel_heat_solver.cpp:
+
+/usr/include/c++/9/bits/uniform_int_dist.h:
+
+/usr/include/c++/9/bits/algorithmfwd.h:
+
+/usr/include/c++/9/bits/stl_algo.h:
+
+/usr/include/x86_64-linux-gnu/bits/getopt_ext.h:
+
+/usr/include/c++/9/algorithm:
 
 /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/parallel_heat_solver.h:
 
@@ -2616,6 +2634,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h:
 
 /usr/include/c++/9/ios:
+
+/usr/include/c++/9/bits/stl_heap.h:
 
 /usr/include/c++/9/bits/alloc_traits.h:
 

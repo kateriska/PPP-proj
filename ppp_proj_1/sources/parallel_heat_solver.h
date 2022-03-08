@@ -13,6 +13,7 @@
 #include "base_heat_solver.h"
 #include <cmath>
 #include <string>
+#include <algorithm>
 
 /**
  * @brief The ParallelHeatSolver class implements parallel MPI based heat
