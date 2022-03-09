@@ -86,6 +86,18 @@ vector<float> ParallelHeatSolver::SplitVector(vector<float> input_vector, int n,
 }
 */
 
+void ParallelHeatSolver::print_array(int* arr, int width, int height)
+{
+    int i;
+    for (i = 0; i< width * height;i++)
+    {
+        if((i != 0) && (i % width == 0))
+            printf("\n");
+        printf("%4d ", arr[i]);
+    }
+    putchar('\n');
+}
+
 
 
 void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > &outResult)
@@ -123,11 +135,8 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       cout << local_tile_size_y << endl;
       local_tile_size = local_tile_size_x * local_tile_size_y;
       domain_length = m_materialProperties.GetInitTemp().size();
-
-      // compute position of each process in grid
-      // 0 - left upper corner
-
     }
+
     MPI_Bcast(&outSizeX, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&outSizeY, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&local_tile_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -136,7 +145,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     MPI_Bcast(&domain_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
     cout << local_tile_size << endl;
 
-    vector<float> init_temp;
+    vector<int> init_temp;
     vector<float> tmp_vector;
     vector<float> out_result;
     vector<int> domain_map;
@@ -146,9 +155,14 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     {
       for (size_t i = 0; i < m_materialProperties.GetInitTemp().size(); ++i) {
         cout << m_materialProperties.GetInitTemp().at(i) << endl;
-        float value = m_materialProperties.GetInitTemp().at(i);
-        cout << endl;
-          init_temp.push_back(m_materialProperties.GetInitTemp().at(i));
+        int value = (float) m_materialProperties.GetInitTemp().at(i);
+        float edited_value = round( value * 10.0 ) / 10.0;
+        cout << edited_value << endl;
+        //string value_str = to_string(value);
+        //float edited_value = stof(value_str);
+        //cout << value_str << endl;
+        //cout << value;
+          init_temp.push_back(edited_value);
 
 
       }
@@ -165,6 +179,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     // each iteration of this loop process the next set of `n` elements
     // and store it in a vector at k'th index in `vec`
     // https://www.techiedelight.com/split-vector-into-subvectors-cpp/
+    /*
     for (int k = 0; k < size; ++k)
     {
         // get range for the next set of `n` elements
@@ -181,13 +196,15 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         std::copy(start_itr, end_itr, init_temp_original[k].begin());
 
     }
+    */
 
     for (size_t i = 0; i < m_materialProperties.GetDomainParams().size(); ++i) {
         domain_params.push_back(m_materialProperties.GetDomainParams().at(i));
     }
 
     for (size_t i = 0; i < m_materialProperties.GetDomainMap().size(); ++i) {
-        domain_map.push_back(m_materialProperties.GetDomainMap().at(i));
+      int value = m_materialProperties.GetDomainMap().at(i);
+        domain_map.push_back(value);
     }
 
 
@@ -197,9 +214,9 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     string vector_res = "";
     cout << m_rank << endl;
-    for (size_t i = 0; i < init_temp.size(); ++i)
+    for (size_t i = 0; i < domain_map.size(); ++i)
     {
-      int item = init_temp.at(i);
+      int item = domain_map.at(i);
       vector_res.append(to_string(item));
       vector_res.append(", ");
     }
@@ -214,26 +231,74 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     int displacements[m_num];
     int counts[m_num];
     fill_n(counts, m_num, 1);
+
+    int res = 0;
+    bool skip_to_next_row = false;
+
+    if (outSizeX != 1 && outSizeY == 1)
+    {
+      for(int x = 0; x < outSizeX; x++)
+      {
+        if (x == 0)
+        {
+          res = 0;
+        }
+        else
+        {
+          cout << "Local tile size x " << local_tile_size_x << endl;
+          res = res + local_tile_size_y;
+        }
+        displacements[x] = res;
+        cout << "Result is " << res << endl;
+      }
+    }
+    else {
     for(int x = 0; x < outSizeX; x++){
         for(int y = 0; y < outSizeY; y++){
             cout << x << ", " << y<< endl;
             cout << "Process on index" << x*outSizeX+y <<  endl;
-            int res =  x * sqrt(domain_length) * local_tile_size_x + y * local_tile_size_y;
+            //int res =  x * sqrt(domain_length) * local_tile_size_x + y * local_tile_size_y;
+            if (x == 0 & y == 0)
+            {
+              res = 0;
+            }
+            else if (skip_to_next_row == true)
+            {
+              res = local_tile_size_x * sqrt(domain_length);
+              skip_to_next_row = false;
+            }
+            else
+            {
+              res =  res + local_tile_size_x;
+            }
+
             displacements[x*outSizeX+y] = res;
             cout << "Result is " << res << endl;
 
 
         }
+        skip_to_next_row = true;
+        //res = sqrt(domain_length) * local_tile_size_y;
     }
+  }
+
+
 
     for (auto d : counts)
 {
     std::cout << d << std::endl;
 }
 
+  float *domain_params_local;
+
+  int enlarged_tile_size = (local_tile_size_x + 4) * (local_tile_size_y + 4);
+  int *init_temp_local = (int*)malloc(enlarged_tile_size * sizeof(int));
+  int *domain_map_local = (int*)malloc(enlarged_tile_size * sizeof(int));
+  assert(domain_map_local != NULL);
+
   MPI_Datatype tile_t, resized_tile_t;
-  MPI_Type_vector(local_tile_size_x, local_tile_size_y, sqrt(domain_length), MPI_FLOAT, &tile_t);
-  MPI_Type_create_resized(tile_t, 0, sizeof(float), &resized_tile_t);
+  MPI_Type_vector(local_tile_size_x, local_tile_size_y, sqrt(domain_length), MPI_INT, &tile_t);
+  MPI_Type_create_resized(tile_t, 0, sizeof(int), &resized_tile_t);
   MPI_Type_commit(&tile_t);
   MPI_Type_commit(&resized_tile_t);
 
@@ -253,18 +318,38 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     //MPI_Scatter(tmp_vector.data(), local_tile_size, MPI_FLOAT,  tmp_vector_local.data(), local_tile_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
     //MPI_Scatter(out_result.data(), local_tile_size, MPI_FLOAT,  out_result_local.data(), local_tile_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
-    float *init_temp_local;
-    int *domain_map_local;
-    float *domain_params_local;
+    //float *init_temp_local;
 
-    int enlarged_tile_size = (local_tile_size_x + 4) * (local_tile_size_y + 4);
 
-    
+
+    //int displacements[m_num] = {0,1,16,17};
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    MPI_Scatterv(&(init_temp[0]), counts, displacements, resized_tile_t,
+              &(init_temp_local[0]), local_tile_size_x * local_tile_size_y, MPI_INT,
+              0, MPI_COMM_WORLD);
+
+
+    MPI_Scatterv(&(domain_map[0]), counts, displacements, resized_tile_t,
+                        &(domain_map_local[0]), local_tile_size_x * local_tile_size_y, MPI_INT,
+                        0, MPI_COMM_WORLD);
+
+    for (int i = 0; i < m_num; i++) {
+        MPI_Barrier(MPI_COMM_WORLD);
+
+        if (i == m_rank) {
+            printf("\nRank: %d\n", m_rank);
+            print_array(domain_map_local, local_tile_size_x, local_tile_size_y);
+        }
+    }
+
+
 
 
 
     vector_res = "";
     //cout << m_rank << endl;
+    /*
     for (size_t i = 0; i < domain_map_local.size(); ++i)
     {
       int item = domain_map_local.at(i);
@@ -272,6 +357,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       vector_res.append(", ");
     }
     //cout << vector_res << endl;
+    */
 
     if (m_rank == 0)
     {

@@ -14,6 +14,7 @@
 #include <cmath>
 #include <string>
 #include <algorithm>
+#include <assert.h>
 
 /**
  * @brief The ParallelHeatSolver class implements parallel MPI based heat
@@ -62,7 +63,7 @@ public:
     virtual void RunSolver(std::vector<float, AlignedAllocator<float> > &outResult);
 
     //vector<float> ParallelHeatSolver::SplitVector(vector<float> input_vector, int n, int size)
-
+    void print_array(int* arr, int width, int height);
 
 protected:
     int m_rank;     ///< Process rank in global (MPI_COMM_WORLD) communicator.
