@@ -387,46 +387,90 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         //block_b_map.insert(block_b_map.begin() + ((i + 2) * b_block_w) + 2, &block_map[i * _block_w],&block_map[i * _block_w + _block_w]);
     }
 
+    if (m_rank == 9) {
     list<vector<int>> domain_map_local_list;
+    list<vector<int>> domain_map_enlarged_local_list;
 
     bool start_new_vector = false;
-    vector<int> domain_map_local_row(local_tile_size_x);
+    vector<int> domain_map_local_row;
+    int row_items_count = 0;
     for (size_t i = 0; i < local_tile_size; ++i)
     {
       cout << local_tile_size << endl;
       int item = domain_map_local[i];
+      cout << "ITEM " << item << endl;
+
       if (start_new_vector == true)
       {
+
+        row_items_count = 0;
         cout << "Starting new vector " << endl;
         domain_map_local_row.clear();
         start_new_vector = false;
       }
-      else
-      {
-        domain_map_local_row.push_back(item);
-      }
-      if (i % local_tile_size_x == 1 && i != 1)
+
+      domain_map_local_row.push_back(item);
+      row_items_count++;
+
+      if (row_items_count == local_tile_size_y)
       {
         start_new_vector = true;
         domain_map_local_list.push_back(domain_map_local_row);
+        //domain_map_local_list.push_back(domain_map_local_row);
+        //row_items_count = 0;
       }
 
     }
+
 
     for (auto vect : domain_map_local_list) {
         // Each element of the list is
         // a vector itself
         vector<int> currentVector = vect;
 
+        cout << "[ ";// Printing vector contents
+        for (auto element : currentVector)
+            cout << element << ' ';
+        currentVector.insert(currentVector.begin(), 0);
+        currentVector.insert(currentVector.begin(), 0);
+        currentVector.push_back(0);
+        currentVector.push_back(0);
+        domain_map_enlarged_local_list.push_back(currentVector);
+
+
+
+
+
+
+        cout << ']';
+        cout << '\n';
+    }
+
+    vector<int> zeros_vector((local_tile_size_y + 4), 0);
+    domain_map_enlarged_local_list.push_front(zeros_vector);
+    domain_map_enlarged_local_list.push_front(zeros_vector);
+    domain_map_enlarged_local_list.push_back(zeros_vector);
+    domain_map_enlarged_local_list.push_back(zeros_vector);
+
+    for (auto vect : domain_map_enlarged_local_list) {
+        // Each element of the list is
+        // a vector itself
+        vector<int> currentVector = vect;
+
         cout << "[ ";
+
+
+
 
         // Printing vector contents
         for (auto element : currentVector)
             cout << element << ' ';
 
+
         cout << ']';
         cout << '\n';
     }
+  }
 
 
 
