@@ -145,7 +145,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     MPI_Bcast(&domain_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
     cout << local_tile_size << endl;
 
-    vector<int> init_temp;
+    vector<float> init_temp;
     vector<float> tmp_vector;
     vector<float> out_result;
     vector<int> domain_map;
@@ -155,14 +155,14 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     {
       for (size_t i = 0; i < m_materialProperties.GetInitTemp().size(); ++i) {
         cout << m_materialProperties.GetInitTemp().at(i) << endl;
-        int value = (float) m_materialProperties.GetInitTemp().at(i);
-        float edited_value = round( value * 10.0 ) / 10.0;
-        cout << edited_value << endl;
+        float value = m_materialProperties.GetInitTemp().at(i);
+        //float edited_value = round( value * 10.0 ) / 10.0;
+        //cout << edited_value << endl;
         //string value_str = to_string(value);
         //float edited_value = stof(value_str);
         //cout << value_str << endl;
         //cout << value;
-          init_temp.push_back(edited_value);
+        init_temp.push_back(value);
 
 
       }
@@ -289,16 +289,20 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     std::cout << d << std::endl;
 }
 
-  float *domain_params_local;
+
 
   int enlarged_tile_size = (local_tile_size_x + 4) * (local_tile_size_y + 4);
-  int *init_temp_local = (int*)malloc(enlarged_tile_size * sizeof(int));
+  int enlarged_tile_size_x = local_tile_size_x + 4;
+  int enlarged_tile_size_y = local_tile_size_y + 4;
+
+  float *init_temp_local = (float*)malloc(enlarged_tile_size * sizeof(float));
   int *domain_map_local = (int*)malloc(enlarged_tile_size * sizeof(int));
+  float *domain_params_local = (float*)malloc(enlarged_tile_size * sizeof(float));
   assert(domain_map_local != NULL);
 
   MPI_Datatype tile_t, resized_tile_t;
-  MPI_Type_vector(local_tile_size_x, local_tile_size_y, sqrt(domain_length), MPI_INT, &tile_t);
-  MPI_Type_create_resized(tile_t, 0, sizeof(int), &resized_tile_t);
+  MPI_Type_vector(local_tile_size_x, local_tile_size_y, sqrt(domain_length), MPI_FLOAT, &tile_t);
+  MPI_Type_create_resized(tile_t, 0, sizeof(float), &resized_tile_t);
   MPI_Type_commit(&tile_t);
   MPI_Type_commit(&resized_tile_t);
 
@@ -325,14 +329,9 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     //int displacements[m_num] = {0,1,16,17};
     MPI_Barrier(MPI_COMM_WORLD);
 
-    MPI_Scatterv(&(init_temp[0]), counts, displacements, resized_tile_t,
-              &(init_temp_local[0]), local_tile_size_x * local_tile_size_y, MPI_INT,
-              0, MPI_COMM_WORLD);
-
-
-    MPI_Scatterv(&(domain_map[0]), counts, displacements, resized_tile_t,
-                        &(domain_map_local[0]), local_tile_size_x * local_tile_size_y, MPI_INT,
-                        0, MPI_COMM_WORLD);
+    MPI_Scatterv(&(init_temp[0]), counts, displacements, resized_tile_t, &(init_temp_local[0]), local_tile_size_x * local_tile_size_y, MPI_FLOAT, 0, MPI_COMM_WORLD);
+    MPI_Scatterv(&(domain_map[0]), counts, displacements, resized_tile_t, &(domain_map_local[0]), local_tile_size_x * local_tile_size_y, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Scatterv(&(domain_params[0]), counts, displacements, resized_tile_t, &(domain_params_local[0]), local_tile_size_x * local_tile_size_y, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
     for (int i = 0; i < m_num; i++) {
         MPI_Barrier(MPI_COMM_WORLD);
@@ -342,6 +341,112 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
             print_array(domain_map_local, local_tile_size_x, local_tile_size_y);
         }
     }
+
+    vector<int> middle_ranks;
+    int middle_column = outSizeY / 2;
+
+    for (int i = 0; i < m_num; i++) {
+      int column_rank = i % outSizeY;
+      if (middle_column == column_rank || i == 0)
+      {
+        middle_ranks.push_back(i);
+      }
+    }
+
+
+
+    vector_res = "";
+    cout << m_rank << endl;
+    for (size_t i = 0; i < middle_ranks.size(); ++i)
+    {
+      int item = middle_ranks.at(i);
+      vector_res.append(to_string(item));
+      vector_res.append(", ");
+    }
+
+
+    cout << vector_res << endl;
+    MPI_Group WORLD_GROUP;
+    MPI_Group MIDDLE_COLUMN_GROUP;
+    MPI_Comm MPI_COMM_MIDDLE_COLUMN;
+
+
+    MPI_Comm_group(MPI_COMM_WORLD, &WORLD_GROUP);
+    MPI_Group_incl(WORLD_GROUP, middle_ranks.size(), middle_ranks.data(), &MIDDLE_COLUMN_GROUP);
+    MPI_Comm_create(MPI_COMM_WORLD, MIDDLE_COLUMN_GROUP, &MPI_COMM_MIDDLE_COLUMN);
+
+    cout << "Hhhh" << endl;
+    cout << enlarged_tile_size_x << "; " << enlarged_tile_size_y << endl;;
+    vector<int> domain_map_local_with_borders(enlarged_tile_size);
+    vector<float> domain_params_with_borders(enlarged_tile_size);
+    cout << enlarged_tile_size << endl;
+
+
+    for (int i = 0; i < local_tile_size_y; i++) {
+        domain_map_local_with_borders.insert(domain_map_local_with_borders.begin() + ((i + 2) * enlarged_tile_size_x) + 2, &domain_map_local[i * local_tile_size_x],&domain_map_local[i * local_tile_size_x + local_tile_size_x]);
+        //block_b_map.insert(block_b_map.begin() + ((i + 2) * b_block_w) + 2, &block_map[i * _block_w],&block_map[i * _block_w + _block_w]);
+    }
+
+    list<vector<int>> domain_map_local_list;
+
+    bool start_new_vector = false;
+    vector<int> domain_map_local_row(local_tile_size_x);
+    for (size_t i = 0; i < local_tile_size; ++i)
+    {
+      cout << local_tile_size << endl;
+      int item = domain_map_local[i];
+      if (start_new_vector == true)
+      {
+        cout << "Starting new vector " << endl;
+        domain_map_local_row.clear();
+        start_new_vector = false;
+      }
+      else
+      {
+        domain_map_local_row.push_back(item);
+      }
+      if (i % local_tile_size_x == 1 && i != 1)
+      {
+        start_new_vector = true;
+        domain_map_local_list.push_back(domain_map_local_row);
+      }
+
+    }
+
+    for (auto vect : domain_map_local_list) {
+        // Each element of the list is
+        // a vector itself
+        vector<int> currentVector = vect;
+
+        cout << "[ ";
+
+        // Printing vector contents
+        for (auto element : currentVector)
+            cout << element << ' ';
+
+        cout << ']';
+        cout << '\n';
+    }
+
+
+
+
+
+
+    vector_res = "";
+    cout << m_rank << endl;
+    cout << domain_map_local_with_borders.size() << endl;
+    for (size_t i = 0; i < domain_map_local_with_borders.size(); ++i)
+    {
+      int item = domain_map_local_with_borders.at(i);
+      vector_res.append(to_string(item));
+      vector_res.append(", ");
+    }
+
+    cout << vector_res << endl;
+
+
+
 
 
 

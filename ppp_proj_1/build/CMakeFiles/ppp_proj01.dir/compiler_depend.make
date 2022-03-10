@@ -748,7 +748,141 @@ CMakeFiles/ppp_proj01.dir/main.cpp.o: /home/katerina/Documents/PPP-proj/ppp_proj
   /usr/include/c++/9/bits/algorithmfwd.h \
   /usr/include/c++/9/bits/stl_heap.h \
   /usr/include/c++/9/bits/uniform_int_dist.h \
-  /usr/include/assert.h
+  /usr/include/assert.h \
+  /usr/include/x86_64-linux-gnu/c++/9/bits/stdc++.h \
+  /usr/include/c++/9/cassert \
+  /usr/include/c++/9/cfloat \
+  /usr/lib/gcc/x86_64-linux-gnu/9/include/float.h \
+  /usr/include/c++/9/ciso646 \
+  /usr/include/c++/9/climits \
+  /usr/include/c++/9/csetjmp \
+  /usr/include/setjmp.h \
+  /usr/include/x86_64-linux-gnu/bits/setjmp2.h \
+  /usr/include/c++/9/csignal \
+  /usr/include/signal.h \
+  /usr/include/x86_64-linux-gnu/bits/signum.h \
+  /usr/include/x86_64-linux-gnu/bits/signum-generic.h \
+  /usr/include/x86_64-linux-gnu/bits/types/sig_atomic_t.h \
+  /usr/include/x86_64-linux-gnu/bits/types/siginfo_t.h \
+  /usr/include/x86_64-linux-gnu/bits/types/__sigval_t.h \
+  /usr/include/x86_64-linux-gnu/bits/siginfo-arch.h \
+  /usr/include/x86_64-linux-gnu/bits/siginfo-consts.h \
+  /usr/include/x86_64-linux-gnu/bits/siginfo-consts-arch.h \
+  /usr/include/x86_64-linux-gnu/bits/types/sigval_t.h \
+  /usr/include/x86_64-linux-gnu/bits/types/sigevent_t.h \
+  /usr/include/x86_64-linux-gnu/bits/sigevent-consts.h \
+  /usr/include/x86_64-linux-gnu/bits/sigaction.h \
+  /usr/include/x86_64-linux-gnu/bits/sigcontext.h \
+  /usr/include/x86_64-linux-gnu/bits/types/stack_t.h \
+  /usr/include/x86_64-linux-gnu/sys/ucontext.h \
+  /usr/include/x86_64-linux-gnu/bits/sigstack.h \
+  /usr/include/x86_64-linux-gnu/bits/ss_flags.h \
+  /usr/include/x86_64-linux-gnu/bits/types/struct_sigstack.h \
+  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
+  /usr/include/x86_64-linux-gnu/bits/signal_ext.h \
+  /usr/include/c++/9/cstdarg \
+  /usr/include/c++/9/cstddef \
+  /usr/include/c++/9/cstring \
+  /usr/include/c++/9/ctime \
+  /usr/include/c++/9/ccomplex \
+  /usr/include/c++/9/complex \
+  /usr/include/c++/9/sstream \
+  /usr/include/c++/9/bits/sstream.tcc \
+  /usr/include/c++/9/cfenv \
+  /usr/include/c++/9/fenv.h \
+  /usr/include/fenv.h \
+  /usr/include/x86_64-linux-gnu/bits/fenv.h \
+  /usr/include/x86_64-linux-gnu/bits/fenvinline.h \
+  /usr/include/c++/9/cinttypes \
+  /usr/include/c++/9/cstdalign \
+  /usr/lib/gcc/x86_64-linux-gnu/9/include/stdalign.h \
+  /usr/include/c++/9/cstdbool \
+  /usr/include/c++/9/ctgmath \
+  /usr/include/c++/9/cuchar \
+  /usr/include/uchar.h \
+  /usr/include/c++/9/bitset \
+  /usr/include/c++/9/deque \
+  /usr/include/c++/9/bits/stl_deque.h \
+  /usr/include/c++/9/bits/deque.tcc \
+  /usr/include/c++/9/fstream \
+  /usr/include/c++/9/bits/codecvt.h \
+  /usr/include/x86_64-linux-gnu/c++/9/bits/basic_file.h \
+  /usr/include/x86_64-linux-gnu/c++/9/bits/c++io.h \
+  /usr/include/c++/9/bits/fstream.tcc \
+  /usr/include/c++/9/functional \
+  /usr/include/c++/9/bits/std_function.h \
+  /usr/include/c++/9/iomanip \
+  /usr/include/c++/9/locale \
+  /usr/include/c++/9/bits/locale_facets_nonio.h \
+  /usr/include/x86_64-linux-gnu/c++/9/bits/time_members.h \
+  /usr/include/x86_64-linux-gnu/c++/9/bits/messages_members.h \
+  /usr/include/libintl.h \
+  /usr/include/c++/9/bits/locale_facets_nonio.tcc \
+  /usr/include/c++/9/bits/locale_conv.h \
+  /usr/include/c++/9/iterator \
+  /usr/include/c++/9/bits/stream_iterator.h \
+  /usr/include/c++/9/list \
+  /usr/include/c++/9/bits/stl_list.h \
+  /usr/include/c++/9/bits/list.tcc \
+  /usr/include/c++/9/numeric \
+  /usr/include/c++/9/bits/stl_numeric.h \
+  /usr/include/c++/9/queue \
+  /usr/include/c++/9/bits/stl_queue.h \
+  /usr/include/c++/9/set \
+  /usr/include/c++/9/bits/stl_set.h \
+  /usr/include/c++/9/bits/stl_multiset.h \
+  /usr/include/c++/9/stack \
+  /usr/include/c++/9/bits/stl_stack.h \
+  /usr/include/c++/9/valarray \
+  /usr/include/c++/9/bits/valarray_array.h \
+  /usr/include/c++/9/bits/valarray_array.tcc \
+  /usr/include/c++/9/bits/valarray_before.h \
+  /usr/include/c++/9/bits/slice_array.h \
+  /usr/include/c++/9/bits/valarray_after.h \
+  /usr/include/c++/9/bits/gslice.h \
+  /usr/include/c++/9/bits/gslice_array.h \
+  /usr/include/c++/9/bits/mask_array.h \
+  /usr/include/c++/9/bits/indirect_array.h \
+  /usr/include/c++/9/atomic \
+  /usr/include/c++/9/chrono \
+  /usr/include/c++/9/ratio \
+  /usr/include/c++/9/bits/parse_numbers.h \
+  /usr/include/c++/9/codecvt \
+  /usr/include/c++/9/condition_variable \
+  /usr/include/c++/9/bits/std_mutex.h \
+  /usr/include/c++/9/bits/unique_lock.h \
+  /usr/include/c++/9/forward_list \
+  /usr/include/c++/9/bits/forward_list.h \
+  /usr/include/c++/9/bits/forward_list.tcc \
+  /usr/include/c++/9/future \
+  /usr/include/c++/9/mutex \
+  /usr/include/c++/9/thread \
+  /usr/include/c++/9/bits/atomic_futex.h \
+  /usr/include/c++/9/random \
+  /usr/include/c++/9/bits/random.h \
+  /usr/include/x86_64-linux-gnu/c++/9/bits/opt_random.h \
+  /usr/include/c++/9/bits/random.tcc \
+  /usr/include/c++/9/regex \
+  /usr/include/c++/9/bits/regex_constants.h \
+  /usr/include/c++/9/bits/regex_error.h \
+  /usr/include/c++/9/bits/regex_automaton.h \
+  /usr/include/c++/9/bits/regex_automaton.tcc \
+  /usr/include/c++/9/bits/regex_scanner.h \
+  /usr/include/c++/9/bits/regex_scanner.tcc \
+  /usr/include/c++/9/bits/regex_compiler.h \
+  /usr/include/c++/9/bits/regex_compiler.tcc \
+  /usr/include/c++/9/bits/regex.h \
+  /usr/include/c++/9/bits/regex.tcc \
+  /usr/include/c++/9/bits/regex_executor.h \
+  /usr/include/c++/9/bits/regex_executor.tcc \
+  /usr/include/c++/9/scoped_allocator \
+  /usr/include/c++/9/typeindex \
+  /usr/include/c++/9/unordered_map \
+  /usr/include/c++/9/bits/hashtable.h \
+  /usr/include/c++/9/bits/hashtable_policy.h \
+  /usr/include/c++/9/bits/unordered_map.h \
+  /usr/include/c++/9/unordered_set \
+  /usr/include/c++/9/bits/unordered_set.h
 
 CMakeFiles/ppp_proj01.dir/material_properties.cpp.o: /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/material_properties.cpp \
   /usr/include/stdc-predef.h \
@@ -1464,7 +1598,150 @@ CMakeFiles/ppp_proj01.dir/parallel_heat_solver.cpp.o: /home/katerina/Documents/P
   /usr/include/c++/9/bits/algorithmfwd.h \
   /usr/include/c++/9/bits/stl_heap.h \
   /usr/include/c++/9/bits/uniform_int_dist.h \
-  /usr/include/assert.h
+  /usr/include/assert.h \
+  /usr/include/x86_64-linux-gnu/c++/9/bits/stdc++.h \
+  /usr/include/c++/9/cassert \
+  /usr/include/c++/9/cfloat \
+  /usr/lib/gcc/x86_64-linux-gnu/9/include/float.h \
+  /usr/include/c++/9/ciso646 \
+  /usr/include/c++/9/climits \
+  /usr/include/c++/9/csetjmp \
+  /usr/include/setjmp.h \
+  /usr/include/x86_64-linux-gnu/bits/setjmp2.h \
+  /usr/include/c++/9/csignal \
+  /usr/include/signal.h \
+  /usr/include/x86_64-linux-gnu/bits/signum.h \
+  /usr/include/x86_64-linux-gnu/bits/signum-generic.h \
+  /usr/include/x86_64-linux-gnu/bits/types/sig_atomic_t.h \
+  /usr/include/x86_64-linux-gnu/bits/types/siginfo_t.h \
+  /usr/include/x86_64-linux-gnu/bits/types/__sigval_t.h \
+  /usr/include/x86_64-linux-gnu/bits/siginfo-arch.h \
+  /usr/include/x86_64-linux-gnu/bits/siginfo-consts.h \
+  /usr/include/x86_64-linux-gnu/bits/siginfo-consts-arch.h \
+  /usr/include/x86_64-linux-gnu/bits/types/sigval_t.h \
+  /usr/include/x86_64-linux-gnu/bits/types/sigevent_t.h \
+  /usr/include/x86_64-linux-gnu/bits/sigevent-consts.h \
+  /usr/include/x86_64-linux-gnu/bits/sigaction.h \
+  /usr/include/x86_64-linux-gnu/bits/sigcontext.h \
+  /usr/include/x86_64-linux-gnu/bits/types/stack_t.h \
+  /usr/include/x86_64-linux-gnu/sys/ucontext.h \
+  /usr/include/x86_64-linux-gnu/bits/sigstack.h \
+  /usr/include/x86_64-linux-gnu/bits/ss_flags.h \
+  /usr/include/x86_64-linux-gnu/bits/types/struct_sigstack.h \
+  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
+  /usr/include/x86_64-linux-gnu/bits/signal_ext.h \
+  /usr/include/c++/9/cstdarg \
+  /usr/include/c++/9/cstddef \
+  /usr/include/c++/9/cstring \
+  /usr/include/string.h \
+  /usr/include/strings.h \
+  /usr/include/x86_64-linux-gnu/bits/strings_fortified.h \
+  /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
+  /usr/include/c++/9/ctime \
+  /usr/include/c++/9/ccomplex \
+  /usr/include/c++/9/complex \
+  /usr/include/c++/9/sstream \
+  /usr/include/c++/9/bits/sstream.tcc \
+  /usr/include/c++/9/cfenv \
+  /usr/include/c++/9/fenv.h \
+  /usr/include/fenv.h \
+  /usr/include/x86_64-linux-gnu/bits/fenv.h \
+  /usr/include/x86_64-linux-gnu/bits/fenvinline.h \
+  /usr/include/c++/9/cinttypes \
+  /usr/include/c++/9/cstdalign \
+  /usr/lib/gcc/x86_64-linux-gnu/9/include/stdalign.h \
+  /usr/include/c++/9/cstdbool \
+  /usr/include/c++/9/ctgmath \
+  /usr/include/c++/9/cuchar \
+  /usr/include/uchar.h \
+  /usr/include/c++/9/bitset \
+  /usr/include/c++/9/deque \
+  /usr/include/c++/9/bits/stl_deque.h \
+  /usr/include/c++/9/bits/deque.tcc \
+  /usr/include/c++/9/fstream \
+  /usr/include/c++/9/bits/codecvt.h \
+  /usr/include/x86_64-linux-gnu/c++/9/bits/basic_file.h \
+  /usr/include/x86_64-linux-gnu/c++/9/bits/c++io.h \
+  /usr/include/c++/9/bits/fstream.tcc \
+  /usr/include/c++/9/functional \
+  /usr/include/c++/9/bits/std_function.h \
+  /usr/include/c++/9/iomanip \
+  /usr/include/c++/9/locale \
+  /usr/include/c++/9/bits/locale_facets_nonio.h \
+  /usr/include/x86_64-linux-gnu/c++/9/bits/time_members.h \
+  /usr/include/x86_64-linux-gnu/c++/9/bits/messages_members.h \
+  /usr/include/libintl.h \
+  /usr/include/c++/9/bits/locale_facets_nonio.tcc \
+  /usr/include/c++/9/bits/locale_conv.h \
+  /usr/include/c++/9/iterator \
+  /usr/include/c++/9/bits/stream_iterator.h \
+  /usr/include/c++/9/list \
+  /usr/include/c++/9/bits/stl_list.h \
+  /usr/include/c++/9/bits/list.tcc \
+  /usr/include/c++/9/map \
+  /usr/include/c++/9/bits/stl_tree.h \
+  /usr/include/c++/9/bits/stl_map.h \
+  /usr/include/c++/9/bits/stl_multimap.h \
+  /usr/include/c++/9/bits/erase_if.h \
+  /usr/include/c++/9/numeric \
+  /usr/include/c++/9/bits/stl_numeric.h \
+  /usr/include/c++/9/queue \
+  /usr/include/c++/9/bits/stl_queue.h \
+  /usr/include/c++/9/set \
+  /usr/include/c++/9/bits/stl_set.h \
+  /usr/include/c++/9/bits/stl_multiset.h \
+  /usr/include/c++/9/stack \
+  /usr/include/c++/9/bits/stl_stack.h \
+  /usr/include/c++/9/valarray \
+  /usr/include/c++/9/bits/valarray_array.h \
+  /usr/include/c++/9/bits/valarray_array.tcc \
+  /usr/include/c++/9/bits/valarray_before.h \
+  /usr/include/c++/9/bits/slice_array.h \
+  /usr/include/c++/9/bits/valarray_after.h \
+  /usr/include/c++/9/bits/gslice.h \
+  /usr/include/c++/9/bits/gslice_array.h \
+  /usr/include/c++/9/bits/mask_array.h \
+  /usr/include/c++/9/bits/indirect_array.h \
+  /usr/include/c++/9/atomic \
+  /usr/include/c++/9/chrono \
+  /usr/include/c++/9/ratio \
+  /usr/include/c++/9/bits/parse_numbers.h \
+  /usr/include/c++/9/codecvt \
+  /usr/include/c++/9/condition_variable \
+  /usr/include/c++/9/bits/std_mutex.h \
+  /usr/include/c++/9/bits/unique_lock.h \
+  /usr/include/c++/9/forward_list \
+  /usr/include/c++/9/bits/forward_list.h \
+  /usr/include/c++/9/bits/forward_list.tcc \
+  /usr/include/c++/9/future \
+  /usr/include/c++/9/mutex \
+  /usr/include/c++/9/thread \
+  /usr/include/c++/9/bits/atomic_futex.h \
+  /usr/include/c++/9/random \
+  /usr/include/c++/9/bits/random.h \
+  /usr/include/x86_64-linux-gnu/c++/9/bits/opt_random.h \
+  /usr/include/c++/9/bits/random.tcc \
+  /usr/include/c++/9/regex \
+  /usr/include/c++/9/bits/regex_constants.h \
+  /usr/include/c++/9/bits/regex_error.h \
+  /usr/include/c++/9/bits/regex_automaton.h \
+  /usr/include/c++/9/bits/regex_automaton.tcc \
+  /usr/include/c++/9/bits/regex_scanner.h \
+  /usr/include/c++/9/bits/regex_scanner.tcc \
+  /usr/include/c++/9/bits/regex_compiler.h \
+  /usr/include/c++/9/bits/regex_compiler.tcc \
+  /usr/include/c++/9/bits/regex.h \
+  /usr/include/c++/9/bits/regex.tcc \
+  /usr/include/c++/9/bits/regex_executor.h \
+  /usr/include/c++/9/bits/regex_executor.tcc \
+  /usr/include/c++/9/scoped_allocator \
+  /usr/include/c++/9/typeindex \
+  /usr/include/c++/9/unordered_map \
+  /usr/include/c++/9/bits/hashtable.h \
+  /usr/include/c++/9/bits/hashtable_policy.h \
+  /usr/include/c++/9/bits/unordered_map.h \
+  /usr/include/c++/9/unordered_set \
+  /usr/include/c++/9/bits/unordered_set.h
 
 CMakeFiles/ppp_proj01.dir/sequential_heat_solver.cpp.o: /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/sequential_heat_solver.cpp \
   /usr/include/stdc-predef.h \
@@ -2129,21 +2406,135 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
   /usr/include/c++/9/backward/auto_ptr.h
 
 
-/usr/include/c++/9/bits/sstream.tcc:
-
 /usr/include/x86_64-linux-gnu/bits/getopt_core.h:
 
 /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/simulation_properties.cpp:
 
 /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/parallel_heat_solver.cpp:
 
+/usr/include/c++/9/bits/unordered_set.h:
+
+/usr/include/c++/9/bits/hashtable_policy.h:
+
+/usr/include/c++/9/typeindex:
+
+/usr/include/c++/9/bits/regex.h:
+
+/usr/include/c++/9/bits/regex_scanner.h:
+
+/usr/include/c++/9/bits/regex_error.h:
+
+/usr/include/c++/9/regex:
+
+/usr/include/x86_64-linux-gnu/c++/9/bits/opt_random.h:
+
+/usr/include/c++/9/random:
+
+/usr/include/c++/9/bits/atomic_futex.h:
+
+/usr/include/c++/9/future:
+
+/usr/include/c++/9/condition_variable:
+
+/usr/include/c++/9/atomic:
+
+/usr/include/c++/9/bits/mask_array.h:
+
+/usr/include/c++/9/bits/valarray_after.h:
+
+/usr/include/c++/9/bits/indirect_array.h:
+
+/usr/include/c++/9/bits/valarray_before.h:
+
+/usr/include/c++/9/bits/valarray_array.h:
+
+/usr/include/c++/9/stack:
+
+/usr/include/c++/9/bits/stl_multiset.h:
+
+/usr/include/c++/9/bits/stl_set.h:
+
+/usr/include/c++/9/bits/regex_executor.tcc:
+
+/usr/include/c++/9/bits/stl_numeric.h:
+
+/usr/include/c++/9/list:
+
+/usr/include/c++/9/bits/stream_iterator.h:
+
+/usr/include/c++/9/iterator:
+
+/usr/include/c++/9/bits/fstream.tcc:
+
+/usr/include/c++/9/bits/deque.tcc:
+
+/usr/include/uchar.h:
+
+/usr/include/c++/9/cuchar:
+
+/usr/include/c++/9/codecvt:
+
+/usr/include/c++/9/ctgmath:
+
+/usr/include/c++/9/cstdalign:
+
+/usr/include/c++/9/bits/regex_executor.h:
+
+/usr/include/c++/9/cinttypes:
+
+/usr/include/c++/9/fenv.h:
+
+/usr/include/c++/9/cfenv:
+
+/usr/include/c++/9/bits/sstream.tcc:
+
+/usr/include/c++/9/complex:
+
+/usr/include/c++/9/ccomplex:
+
+/usr/include/x86_64-linux-gnu/bits/signal_ext.h:
+
+/usr/include/c++/9/bits/valarray_array.tcc:
+
+/usr/include/x86_64-linux-gnu/bits/sigthread.h:
+
+/usr/include/x86_64-linux-gnu/sys/ucontext.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/stack_t.h:
+
+/usr/include/x86_64-linux-gnu/bits/sigevent-consts.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/sigevent_t.h:
+
+/usr/include/x86_64-linux-gnu/bits/siginfo-consts-arch.h:
+
+/usr/include/x86_64-linux-gnu/bits/ss_flags.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/sig_atomic_t.h:
+
+/usr/include/x86_64-linux-gnu/bits/signum.h:
+
+/usr/include/c++/9/ciso646:
+
+/usr/lib/gcc/x86_64-linux-gnu/9/include/float.h:
+
+/usr/include/setjmp.h:
+
+/usr/include/x86_64-linux-gnu/c++/9/bits/stdc++.h:
+
+/usr/include/c++/9/climits:
+
 /usr/include/c++/9/bits/uniform_int_dist.h:
+
+/usr/include/c++/9/bits/list.tcc:
 
 /usr/include/c++/9/bits/algorithmfwd.h:
 
 /usr/include/c++/9/bits/stl_algo.h:
 
 /usr/include/x86_64-linux-gnu/bits/getopt_ext.h:
+
+/usr/include/c++/9/chrono:
 
 /usr/include/c++/9/algorithm:
 
@@ -2157,6 +2548,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/comm_inln.h:
 
+/usr/include/x86_64-linux-gnu/bits/sigcontext.h:
+
 /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/functions_inln.h:
 
 /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/datatype_inln.h:
@@ -2167,7 +2560,11 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/intracomm.h:
 
+/usr/include/x86_64-linux-gnu/bits/sigstack.h:
+
 /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/errhandler.h:
+
+/usr/include/c++/9/csignal:
 
 /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/comm.h:
 
@@ -2177,15 +2574,21 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/exception.h:
 
+/usr/include/c++/9/cfloat:
+
 /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/functions.h:
 
 /usr/include/c++/9/bits/erase_if.h:
+
+/usr/include/c++/9/bits/stl_stack.h:
 
 /usr/include/c++/9/bits/stl_multimap.h:
 
 /usr/include/c++/9/map:
 
 /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/main.cpp:
+
+/usr/include/c++/9/bits/forward_list.h:
 
 /usr/include/assert.h:
 
@@ -2199,23 +2602,41 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/sequential_heat_solver.cpp:
 
+/usr/include/c++/9/bits/random.tcc:
+
 /usr/include/x86_64-linux-gnu/bits/fp-fast.h:
 
 /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h:
+
+/usr/include/c++/9/queue:
 
 /usr/include/x86_64-linux-gnu/bits/math-vector.h:
 
 /usr/include/c++/9/cmath:
 
+/usr/include/c++/9/bits/random.h:
+
 /usr/include/x86_64-linux-gnu/bits/string_fortified.h:
+
+/usr/include/signal.h:
 
 /usr/include/strings.h:
 
+/usr/include/c++/9/bitset:
+
 /usr/include/string.h:
+
+/usr/include/c++/9/ratio:
 
 /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/simulation_properties.h:
 
+/usr/include/c++/9/forward_list:
+
 /usr/include/c++/9/bits/allocated_ptr.h:
+
+/usr/include/c++/9/bits/regex_scanner.tcc:
+
+/usr/include/c++/9/numeric:
 
 /usr/include/c++/9/bits/shared_ptr_base.h:
 
@@ -2224,6 +2645,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 /usr/lib/gcc/x86_64-linux-gnu/9/include/wbnoinvdintrin.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/9/include/adxintrin.h:
+
+/usr/include/c++/9/bits/slice_array.h:
 
 /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/sequential_heat_solver.h:
 
@@ -2252,6 +2675,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 /usr/lib/gcc/x86_64-linux-gnu/9/include/bmi2intrin.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/9/include/bmiintrin.h:
+
+/usr/include/c++/9/bits/regex_compiler.tcc:
 
 /usr/lib/gcc/x86_64-linux-gnu/9/include/lzcntintrin.h:
 
@@ -2295,9 +2720,15 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/lib/gcc/x86_64-linux-gnu/9/include/xsaveoptintrin.h:
 
+/usr/include/x86_64-linux-gnu/c++/9/bits/c++io.h:
+
+/usr/include/x86_64-linux-gnu/bits/fenv.h:
+
 /usr/lib/gcc/x86_64-linux-gnu/9/include/xsaveintrin.h:
 
 /usr/include/getopt.h:
+
+/usr/include/c++/9/cstdarg:
 
 /usr/lib/gcc/x86_64-linux-gnu/9/include/fxsrintrin.h:
 
@@ -2307,11 +2738,15 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/lib/gcc/x86_64-linux-gnu/9/include/smmintrin.h:
 
+/usr/include/c++/9/bits/unordered_map.h:
+
 /usr/lib/gcc/x86_64-linux-gnu/9/include/tmmintrin.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/9/include/emmintrin.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/9/include/immintrin.h:
+
+/usr/include/x86_64-linux-gnu/c++/9/bits/basic_file.h:
 
 /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/base.h:
 
@@ -2322,6 +2757,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 /usr/include/x86_64-linux-gnu/bits/waitstatus.h:
 
 /usr/include/x86_64-linux-gnu/bits/waitflags.h:
+
+/usr/include/c++/9/bits/stl_deque.h:
 
 /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/win_inln.h:
 
@@ -2334,6 +2771,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 /usr/lib/gcc/x86_64-linux-gnu/9/include/rtmintrin.h:
 
 /usr/include/c++/9/bits/postypes.h:
+
+/usr/include/c++/9/cstdbool:
 
 /usr/include/errno.h:
 
@@ -2349,7 +2788,11 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/include/alloca.h:
 
+/usr/include/c++/9/bits/regex.tcc:
+
 /usr/include/x86_64-linux-gnu/c++/9/bits/c++allocator.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/9/include/stdalign.h:
 
 /usr/include/c++/9/bits/stl_uninitialized.h:
 
@@ -2373,6 +2816,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
 
+/usr/include/c++/9/bits/stl_queue.h:
+
 /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
 
 /usr/include/c++/9/bits/cpp_type_traits.h:
@@ -2382,6 +2827,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 /usr/lib/gcc/x86_64-linux-gnu/9/include/wmmintrin.h:
 
 /usr/include/c++/9/ext/alloc_traits.h:
+
+/usr/include/c++/9/set:
 
 /home/katerina/Documents/hdf5-1.12.1/hdf5/include/H5FDmirror.h:
 
@@ -2398,6 +2845,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 /usr/include/c++/9/bits/stl_raw_storage_iter.h:
 
 /usr/include/c++/9/ext/string_conversions.h:
+
+/usr/include/c++/9/bits/hashtable.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/9/include/avx512pfintrin.h:
 
@@ -2429,11 +2878,15 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/include/c++/9/cwctype:
 
+/usr/include/c++/9/unordered_map:
+
 /usr/include/c++/9/bits/refwrap.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/9/include/xmmintrin.h:
 
 /usr/include/c++/9/clocale:
+
+/usr/include/x86_64-linux-gnu/bits/types/sigval_t.h:
 
 /usr/include/x86_64-linux-gnu/c++/9/bits/c++locale.h:
 
@@ -2466,6 +2919,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 /usr/include/x86_64-linux-gnu/gnu/stubs.h:
 
 /usr/include/c++/9/bits/move.h:
+
+/usr/include/c++/9/bits/gslice.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/9/include/stdint.h:
 
@@ -2515,15 +2970,21 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/lib/gcc/x86_64-linux-gnu/9/include/stddef.h:
 
+/usr/include/c++/9/functional:
+
 /usr/include/c++/9/bits/invoke.h:
 
 /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/info_inln.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/wint_t.h:
 
+/usr/include/fenv.h:
+
 /usr/include/x86_64-linux-gnu/c++/9/bits/os_defines.h:
 
 /usr/include/pthread.h:
+
+/usr/include/c++/9/scoped_allocator:
 
 /usr/include/c++/9/iosfwd:
 
@@ -2546,6 +3007,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 /usr/include/c++/9/bits/ios_base.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
+
+/usr/include/x86_64-linux-gnu/bits/sigaction.h:
 
 /usr/include/x86_64-linux-gnu/c++/9/bits/gthr-default.h:
 
@@ -2581,9 +3044,15 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/include/x86_64-linux-gnu/bits/sys_errlist.h:
 
+/usr/include/c++/9/bits/std_function.h:
+
 /usr/include/x86_64-linux-gnu/bits/wordsize.h:
 
+/usr/include/c++/9/bits/std_mutex.h:
+
 /usr/include/c++/9/ext/new_allocator.h:
+
+/usr/include/c++/9/unordered_set:
 
 /usr/include/c++/9/bits/cxxabi_forced.h:
 
@@ -2595,9 +3064,15 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/include/x86_64-linux-gnu/bits/long-double.h:
 
+/usr/include/c++/9/bits/gslice_array.h:
+
 /usr/include/c++/9/ostream:
 
 /usr/include/x86_64-linux-gnu/sys/types.h:
+
+/usr/include/c++/9/bits/forward_list.tcc:
+
+/usr/include/c++/9/bits/parse_numbers.h:
 
 /usr/include/c++/9/iostream:
 
@@ -2606,6 +3081,10 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
 
 /usr/include/x86_64-linux-gnu/sys/select.h:
+
+/usr/include/c++/9/bits/unique_lock.h:
+
+/usr/include/c++/9/deque:
 
 /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/request.h:
 
@@ -2653,6 +3132,10 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /home/katerina/Documents/hdf5-1.12.1/hdf5/include/H5Apublic.h:
 
+/usr/include/c++/9/bits/regex_automaton.tcc:
+
+/usr/include/c++/9/csetjmp:
+
 /usr/include/c++/9/exception:
 
 /usr/include/c++/9/sstream:
@@ -2663,7 +3146,11 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/include/x86_64-linux-gnu/bits/timesize.h:
 
+/usr/include/x86_64-linux-gnu/bits/types/siginfo_t.h:
+
 /usr/include/c++/9/bits/exception_ptr.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_sigstack.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/9/include/mmintrin.h:
 
@@ -2673,6 +3160,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/include/x86_64-linux-gnu/bits/struct_mutex.h:
 
+/usr/include/c++/9/cstring:
+
 /home/katerina/Documents/hdf5-1.12.1/hdf5/include/H5FDlog.h:
 
 /usr/include/c++/9/bits/atomic_base.h:
@@ -2680,6 +3169,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
 
 /usr/include/c++/9/bits/exception_defines.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/__sigval_t.h:
 
 /usr/include/c++/9/bits/stl_construct.h:
 
@@ -2695,6 +3186,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/include/c++/9/bits/streambuf.tcc:
 
+/usr/include/c++/9/fstream:
+
 /usr/include/c++/9/bits/locale_conv.h:
 
 /usr/include/c++/9/bits/allocator.h:
@@ -2709,6 +3202,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/include/c++/9/ext/type_traits.h:
 
+/usr/include/x86_64-linux-gnu/bits/signum-generic.h:
+
 /usr/include/c++/9/bits/std_abs.h:
 
 /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/intercomm_inln.h:
@@ -2718,6 +3213,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 /usr/lib/gcc/x86_64-linux-gnu/9/include/rdseedintrin.h:
 
 /usr/include/c++/9/type_traits:
+
+/usr/include/c++/9/bits/regex_compiler.h:
 
 /usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h:
 
@@ -2745,6 +3242,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/include/c++/9/cerrno:
 
+/usr/include/c++/9/cassert:
+
 /usr/include/x86_64-linux-gnu/bits/errno.h:
 
 /usr/include/sched.h:
@@ -2755,6 +3254,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/include/linux/errno.h:
 
+/usr/include/x86_64-linux-gnu/bits/fenvinline.h:
+
 /usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
 
 /usr/include/asm-generic/errno.h:
@@ -2763,7 +3264,11 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/include/x86_64-linux-gnu/bits/types/error_t.h:
 
+/usr/include/c++/9/cstddef:
+
 /usr/include/c++/9/bits/basic_string.tcc:
+
+/usr/include/x86_64-linux-gnu/bits/siginfo-arch.h:
 
 /usr/include/c++/9/utility:
 
@@ -2781,6 +3286,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /usr/include/c++/9/system_error:
 
+/usr/include/c++/9/thread:
+
 /usr/include/x86_64-linux-gnu/c++/9/bits/error_constants.h:
 
 /usr/include/c++/9/stdexcept:
@@ -2796,6 +3303,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 /usr/include/x86_64-linux-gnu/bits/posix2_lim.h:
 
 /home/katerina/Documents/hdf5-1.12.1/hdf5/include/H5FDstdio.h:
+
+/usr/include/c++/9/valarray:
 
 /usr/include/c++/9/bits/streambuf_iterator.h:
 
@@ -2840,6 +3349,8 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 /usr/include/c++/9/bits/concept_check.h:
 
 /home/katerina/Documents/hdf5-1.12.1/hdf5/include/H5ESpublic.h:
+
+/usr/include/c++/9/bits/stl_list.h:
 
 /usr/include/c++/9/bits/unique_ptr.h:
 
@@ -2899,11 +3410,15 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /home/katerina/Documents/PPP-proj/ppp_proj_1/sources/material_properties.h:
 
+/usr/include/x86_64-linux-gnu/bits/siginfo-consts.h:
+
 /home/katerina/Documents/hdf5-1.12.1/hdf5/include/H5Opublic.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/9/include/waitpkgintrin.h:
 
 /home/katerina/Documents/hdf5-1.12.1/hdf5/include/H5Tpublic.h:
+
+/usr/include/c++/9/mutex:
 
 /usr/include/c++/9/bits/stringfwd.h:
 
@@ -2915,13 +3430,19 @@ CMakeFiles/ppp_proj01.dir/simulation_properties.cpp.o: /home/katerina/Documents/
 
 /home/katerina/Documents/hdf5-1.12.1/hdf5/include/H5Fpublic.h:
 
+/usr/include/c++/9/bits/regex_automaton.h:
+
 /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/intercomm.h:
 
 /home/katerina/Documents/hdf5-1.12.1/hdf5/include/H5Gpublic.h:
 
+/usr/include/c++/9/bits/regex_constants.h:
+
 /usr/lib/gcc/x86_64-linux-gnu/9/include/avx512vpopcntdqvlintrin.h:
 
 /home/katerina/Documents/hdf5-1.12.1/hdf5/include/H5MMpublic.h:
+
+/usr/include/x86_64-linux-gnu/bits/setjmp2.h:
 
 /usr/include/c++/9/ext/aligned_buffer.h:
 

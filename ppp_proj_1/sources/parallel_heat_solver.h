@@ -15,6 +15,7 @@
 #include <string>
 #include <algorithm>
 #include <assert.h>
+#include <bits/stdc++.h>
 
 /**
  * @brief The ParallelHeatSolver class implements parallel MPI based heat
