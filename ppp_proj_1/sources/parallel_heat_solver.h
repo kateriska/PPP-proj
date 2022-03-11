@@ -16,6 +16,10 @@
 #include <algorithm>
 #include <assert.h>
 #include <bits/stdc++.h>
+#include <list>
+#include <vector>
+
+using namespace std;
 
 /**
  * @brief The ParallelHeatSolver class implements parallel MPI based heat
@@ -65,6 +69,11 @@ public:
 
     //vector<float> ParallelHeatSolver::SplitVector(vector<float> input_vector, int n, int size)
     void print_array(int* arr, int width, int height);
+    list<vector<int>> SplitRows(int *input_arr, int local_tile_size, int local_tile_size_y);
+    vector<int> EnlargeTile(list<vector<int>> input_list, int local_tile_size_y);
+    list<vector<float>> SplitRows(float *input_arr, int local_tile_size, int local_tile_size_y);
+    vector<float> EnlargeTile(list<vector<float>> input_list, int local_tile_size_y);
+
 
 protected:
     int m_rank;     ///< Process rank in global (MPI_COMM_WORLD) communicator.

@@ -56,35 +56,199 @@ ParallelHeatSolver::~ParallelHeatSolver()
 {
 
 }
-/*
-vector<float> ParallelHeatSolver::SplitVector(vector<float> input_vector, int n, int size)
+
+// split vector via rows to list of vectors - each vector is one row
+list<vector<int>> ParallelHeatSolver::SplitRows(int *input_arr, int local_tile_size, int local_tile_size_y)
 {
 
+  list<vector<int>> output_list;
 
+  bool start_new_vector = false;
+  vector<int> row_items;
+  int row_items_count = 0;
+  for (size_t i = 0; i < local_tile_size; ++i)
+  {
+    int item = input_arr[i];
+    //cout << "ITEM " << item << endl;
 
-
-    // create an array of vectors to store the sub-vectors
-    std::vector<float> vec[size];
-
-    // each iteration of this loop process the next set of `n` elements
-    // and store it in a vector at k'th index in `vec`
-    for (int k = 0; k < size; ++k)
+    if (start_new_vector == true)
     {
-        // get range for the next set of `n` elements
-        auto start_itr = std::next(v.cbegin(), k*n);
-        auto end_itr = std::next(v.cbegin(), k*n + n);
-
-        // allocate memory for the sub-vector
-        vec[k].resize(n);
-
-        // copy elements from the input range to the sub-vector
-        std::copy(start_itr, end_itr, vec[k].begin());
+      row_items_count = 0;
+      //cout << "Starting new vector " << endl;
+      row_items.clear();
+      start_new_vector = false;
     }
 
-    return vec;
+    row_items.push_back(item);
+    row_items_count++;
+
+    if (row_items_count == local_tile_size_y)
+    {
+      start_new_vector = true;
+      output_list.push_back(row_items);
+
+    }
+  }
+    return output_list;
 
 }
-*/
+
+// split vector via rows to list of vectors - each vector is one row
+list<vector<float>> ParallelHeatSolver::SplitRows(float *input_arr, int local_tile_size, int local_tile_size_y)
+{
+
+  list<vector<float>> output_list;
+
+  bool start_new_vector = false;
+  vector<float> row_items;
+  int row_items_count = 0;
+  for (size_t i = 0; i < local_tile_size; ++i)
+  {
+    float item = input_arr[i];
+    //cout << "ITEM " << item << endl;
+
+    if (start_new_vector == true)
+    {
+      row_items_count = 0;
+      //cout << "Starting new vector " << endl;
+      row_items.clear();
+      start_new_vector = false;
+    }
+
+    row_items.push_back(item);
+    row_items_count++;
+
+    if (row_items_count == local_tile_size_y)
+    {
+      start_new_vector = true;
+      output_list.push_back(row_items);
+
+    }
+  }
+    return output_list;
+
+}
+
+vector<int> ParallelHeatSolver::EnlargeTile(list<vector<int>> input_list, int local_tile_size_y)
+{
+  vector<int> output_vector_with_borders;
+  list<vector<int>> enlarged_list;
+  for (auto vect : input_list) {
+      // Each element of the list is
+      // a vector itself
+      vector<int> currentVector = vect;
+
+      cout << "[ ";// Printing vector contents
+      for (auto element : currentVector)
+          cout << element << ' ';
+      currentVector.insert(currentVector.begin(), 0);
+      currentVector.insert(currentVector.begin(), 0);
+      currentVector.push_back(0);
+      currentVector.push_back(0);
+      enlarged_list.push_back(currentVector);
+      cout << ']';
+      cout << '\n';
+  }
+
+  vector<int> zeros_vector((local_tile_size_y + 4), 0);
+  enlarged_list.push_front(zeros_vector);
+  enlarged_list.push_front(zeros_vector);
+  enlarged_list.push_back(zeros_vector);
+  enlarged_list.push_back(zeros_vector);
+
+  for (auto vect : enlarged_list) {
+      // Each element of the list is
+      // a vector itself
+      vector<int> currentVector = vect;
+      for (size_t i = 0; i < currentVector.size(); ++i)
+      {
+        output_vector_with_borders.push_back(currentVector.at(i));
+      }
+
+      cout << "[ ";
+
+      // Printing vector contents
+      for (auto element : currentVector)
+          cout << element << ' ';
+
+
+      cout << ']';
+      cout << '\n';
+  }
+
+  string vector_res = "";
+  for (size_t i = 0; i < output_vector_with_borders.size(); ++i)
+  {
+    int item = output_vector_with_borders.at(i);
+    vector_res.append(to_string(item));
+    vector_res.append(", ");
+  }
+  cout << "Print result map" << endl;
+  cout << vector_res << endl;
+  return output_vector_with_borders;
+}
+
+vector<float> ParallelHeatSolver::EnlargeTile(list<vector<float>> input_list, int local_tile_size_y)
+{
+  vector<float> output_vector_with_borders;
+  list<vector<float>> enlarged_list;
+  for (auto vect : input_list) {
+      // Each element of the list is
+      // a vector itself
+      vector<float> currentVector = vect;
+
+      cout << "[ ";// Printing vector contents
+      for (auto element : currentVector)
+          cout << element << ' ';
+      currentVector.insert(currentVector.begin(), 0);
+      currentVector.insert(currentVector.begin(), 0);
+      currentVector.push_back(0);
+      currentVector.push_back(0);
+      enlarged_list.push_back(currentVector);
+      cout << ']';
+      cout << '\n';
+  }
+
+  vector<float> zeros_vector((local_tile_size_y + 4), 0);
+  enlarged_list.push_front(zeros_vector);
+  enlarged_list.push_front(zeros_vector);
+  enlarged_list.push_back(zeros_vector);
+  enlarged_list.push_back(zeros_vector);
+
+  for (auto vect : enlarged_list) {
+      // Each element of the list is
+      // a vector itself
+      vector<float> currentVector = vect;
+      for (size_t i = 0; i < currentVector.size(); ++i)
+      {
+        output_vector_with_borders.push_back(currentVector.at(i));
+      }
+
+      cout << "[ ";
+
+      // Printing vector contents
+      for (auto element : currentVector)
+          cout << element << ' ';
+
+
+      cout << ']';
+      cout << '\n';
+  }
+
+  string vector_res = "";
+  for (size_t i = 0; i < output_vector_with_borders.size(); ++i)
+  {
+    float item = output_vector_with_borders.at(i);
+    vector_res.append(to_string(item));
+    vector_res.append(", ");
+  }
+  cout << "Print result map" << endl;
+  cout << vector_res << endl;
+  return output_vector_with_borders;
+}
+
+
+
 
 void ParallelHeatSolver::print_array(int* arr, int width, int height)
 {
@@ -154,57 +318,19 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     if (m_rank == 0)
     {
       for (size_t i = 0; i < m_materialProperties.GetInitTemp().size(); ++i) {
-        cout << m_materialProperties.GetInitTemp().at(i) << endl;
+        //cout << m_materialProperties.GetInitTemp().at(i) << endl;
         float value = m_materialProperties.GetInitTemp().at(i);
-        //float edited_value = round( value * 10.0 ) / 10.0;
-        //cout << edited_value << endl;
-        //string value_str = to_string(value);
-        //float edited_value = stof(value_str);
-        //cout << value_str << endl;
-        //cout << value;
         init_temp.push_back(value);
-
-
       }
 
-      //list<vector<float> >& init_temp_original(outSizeX);
-
-      int n = local_tile_size * outSizeX;
-      int size = outSizeY;
-
-      // create an array of vectors to store the sub-vectors
-    std::vector<float> init_temp_original[size];
-
-
-    // each iteration of this loop process the next set of `n` elements
-    // and store it in a vector at k'th index in `vec`
-    // https://www.techiedelight.com/split-vector-into-subvectors-cpp/
-    /*
-    for (int k = 0; k < size; ++k)
-    {
-        // get range for the next set of `n` elements
-        auto start_itr = std::next(init_temp.cbegin(), k*n);
-        auto end_itr = std::next(init_temp.cbegin(), k*n + n);
-
-        // allocate memory for the sub-vector
-        init_temp_original[k].resize(n);
-
-        // code to handle the last sub-vector as it might
-        // contain fewer elements
-
-        // copy elements from the input range to the sub-vector
-        std::copy(start_itr, end_itr, init_temp_original[k].begin());
-
-    }
-    */
-
     for (size_t i = 0; i < m_materialProperties.GetDomainParams().size(); ++i) {
-        domain_params.push_back(m_materialProperties.GetDomainParams().at(i));
+      float value = m_materialProperties.GetDomainParams().at(i);
+      domain_params.push_back(value);
     }
 
     for (size_t i = 0; i < m_materialProperties.GetDomainMap().size(); ++i) {
       int value = m_materialProperties.GetDomainMap().at(i);
-        domain_map.push_back(value);
+      domain_map.push_back(value);
     }
 
 
@@ -283,14 +409,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
   }
 
 
-
-    for (auto d : counts)
-{
-    std::cout << d << std::endl;
-}
-
-
-
   int enlarged_tile_size = (local_tile_size_x + 4) * (local_tile_size_y + 4);
   int enlarged_tile_size_x = local_tile_size_x + 4;
   int enlarged_tile_size_y = local_tile_size_y + 4;
@@ -306,27 +424,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
   MPI_Type_commit(&tile_t);
   MPI_Type_commit(&resized_tile_t);
 
-
-    /*
-    vector<float> init_temp_local(local_tile_size);
-    vector<float> tmp_vector_local(local_tile_size);
-    vector<float> out_result_local(local_tile_size);
-    vector<int> domain_map_local(local_tile_size);
-    vector<float> domain_params_local(local_tile_size);
-    */
-
-    //cout << init_temp_local.data() <<endl;
-    //MPI_Scatter(init_temp.data(), local_tile_size, MPI_FLOAT,  init_temp_local.data(), local_tile_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
-    //MPI_Scatter(domain_params.data(), local_tile_size, MPI_FLOAT,  domain_params_local.data(), local_tile_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
-    //MPI_Scatter(domain_map.data(), local_tile_size, MPI_INT,  domain_map_local.data(), local_tile_size, MPI_INT, 0, MPI_COMM_WORLD);
-    //MPI_Scatter(tmp_vector.data(), local_tile_size, MPI_FLOAT,  tmp_vector_local.data(), local_tile_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
-    //MPI_Scatter(out_result.data(), local_tile_size, MPI_FLOAT,  out_result_local.data(), local_tile_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
-
-    //float *init_temp_local;
-
-
-
-    //int displacements[m_num] = {0,1,16,17};
     MPI_Barrier(MPI_COMM_WORLD);
 
     MPI_Scatterv(&(init_temp[0]), counts, displacements, resized_tile_t, &(init_temp_local[0]), local_tile_size_x * local_tile_size_y, MPI_FLOAT, 0, MPI_COMM_WORLD);
@@ -375,128 +472,15 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     MPI_Group_incl(WORLD_GROUP, middle_ranks.size(), middle_ranks.data(), &MIDDLE_COLUMN_GROUP);
     MPI_Comm_create(MPI_COMM_WORLD, MIDDLE_COLUMN_GROUP, &MPI_COMM_MIDDLE_COLUMN);
 
-    cout << "Hhhh" << endl;
-    cout << enlarged_tile_size_x << "; " << enlarged_tile_size_y << endl;;
-    vector<int> domain_map_local_with_borders(enlarged_tile_size);
-    vector<float> domain_params_with_borders(enlarged_tile_size);
-    cout << enlarged_tile_size << endl;
+    list<vector<int>> domain_map_local_list = SplitRows(domain_map_local, local_tile_size, local_tile_size_y);
+    vector<int> domain_map_local_with_borders = EnlargeTile(domain_map_local_list, local_tile_size_y);
+    list<vector<float>> domain_params_local_list = SplitRows(domain_params_local, local_tile_size, local_tile_size_y);
+    vector<float> domain_params_local_with_borders = EnlargeTile(domain_params_local_list, local_tile_size_y);
+    list<vector<float>> init_temp_local_list = SplitRows(init_temp_local, local_tile_size, local_tile_size_y);
+    vector<float> init_temp_local_with_borders = EnlargeTile(init_temp_local_list, local_tile_size_y);
 
+    
 
-    for (int i = 0; i < local_tile_size_y; i++) {
-        domain_map_local_with_borders.insert(domain_map_local_with_borders.begin() + ((i + 2) * enlarged_tile_size_x) + 2, &domain_map_local[i * local_tile_size_x],&domain_map_local[i * local_tile_size_x + local_tile_size_x]);
-        //block_b_map.insert(block_b_map.begin() + ((i + 2) * b_block_w) + 2, &block_map[i * _block_w],&block_map[i * _block_w + _block_w]);
-    }
-
-    if (m_rank == 9) {
-    list<vector<int>> domain_map_local_list;
-    list<vector<int>> domain_map_enlarged_local_list;
-
-    bool start_new_vector = false;
-    vector<int> domain_map_local_row;
-    int row_items_count = 0;
-    for (size_t i = 0; i < local_tile_size; ++i)
-    {
-      cout << local_tile_size << endl;
-      int item = domain_map_local[i];
-      cout << "ITEM " << item << endl;
-
-      if (start_new_vector == true)
-      {
-
-        row_items_count = 0;
-        cout << "Starting new vector " << endl;
-        domain_map_local_row.clear();
-        start_new_vector = false;
-      }
-
-      domain_map_local_row.push_back(item);
-      row_items_count++;
-
-      if (row_items_count == local_tile_size_y)
-      {
-        start_new_vector = true;
-        domain_map_local_list.push_back(domain_map_local_row);
-        //domain_map_local_list.push_back(domain_map_local_row);
-        //row_items_count = 0;
-      }
-
-    }
-
-
-    for (auto vect : domain_map_local_list) {
-        // Each element of the list is
-        // a vector itself
-        vector<int> currentVector = vect;
-
-        cout << "[ ";// Printing vector contents
-        for (auto element : currentVector)
-            cout << element << ' ';
-        currentVector.insert(currentVector.begin(), 0);
-        currentVector.insert(currentVector.begin(), 0);
-        currentVector.push_back(0);
-        currentVector.push_back(0);
-        domain_map_enlarged_local_list.push_back(currentVector);
-
-
-
-
-
-
-        cout << ']';
-        cout << '\n';
-    }
-
-    vector<int> zeros_vector((local_tile_size_y + 4), 0);
-    domain_map_enlarged_local_list.push_front(zeros_vector);
-    domain_map_enlarged_local_list.push_front(zeros_vector);
-    domain_map_enlarged_local_list.push_back(zeros_vector);
-    domain_map_enlarged_local_list.push_back(zeros_vector);
-
-    for (auto vect : domain_map_enlarged_local_list) {
-        // Each element of the list is
-        // a vector itself
-        vector<int> currentVector = vect;
-
-        cout << "[ ";
-
-
-
-
-        // Printing vector contents
-        for (auto element : currentVector)
-            cout << element << ' ';
-
-
-        cout << ']';
-        cout << '\n';
-    }
-  }
-
-
-
-
-
-
-    vector_res = "";
-    cout << m_rank << endl;
-    cout << domain_map_local_with_borders.size() << endl;
-    for (size_t i = 0; i < domain_map_local_with_borders.size(); ++i)
-    {
-      int item = domain_map_local_with_borders.at(i);
-      vector_res.append(to_string(item));
-      vector_res.append(", ");
-    }
-
-    cout << vector_res << endl;
-
-
-
-
-
-
-
-
-    vector_res = "";
     //cout << m_rank << endl;
     /*
     for (size_t i = 0; i < domain_map_local.size(); ++i)
