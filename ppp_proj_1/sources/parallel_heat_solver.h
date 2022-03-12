@@ -69,10 +69,10 @@ public:
 
     //vector<float> ParallelHeatSolver::SplitVector(vector<float> input_vector, int n, int size)
     void print_array(int* arr, int width, int height);
-    list<vector<int>> SplitRows(int *input_arr, int local_tile_size, int local_tile_size_y);
-    vector<int> EnlargeTile(list<vector<int>> input_list, int local_tile_size_y);
-    list<vector<float>> SplitRows(float *input_arr, int local_tile_size, int local_tile_size_y);
-    vector<float> EnlargeTile(list<vector<float>> input_list, int local_tile_size_y);
+    list<vector<int>> SplitRows(int *input_arr, int local_tile_size, int local_tile_size_cols);
+    vector<int> EnlargeTile(list<vector<int>> input_list, int local_tile_size_cols);
+    list<vector<float>> SplitRows(float *input_arr, int local_tile_size, int local_tile_size_cols);
+    vector<float> EnlargeTile(list<vector<float>> input_list, int local_tile_size_cols);
 
 
 protected:
