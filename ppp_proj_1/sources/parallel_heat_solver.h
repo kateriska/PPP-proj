@@ -74,6 +74,8 @@ public:
     vector<int> EnlargeTile(list<vector<int>> input_list, int local_tile_size_cols);
     list<vector<float>> SplitRows(float *input_arr, int local_tile_size, int local_tile_size_cols);
     vector<float> EnlargeTile(list<vector<float>> input_list, int local_tile_size_cols);
+    vector<int> Enlarge1DTile(int *input_arr, int local_tile_size);
+    vector<float> Enlarge1DTile(float *input_arr, int local_tile_size);
 
 
 protected:
