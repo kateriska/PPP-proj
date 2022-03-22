@@ -1028,9 +1028,58 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     float *workTempArrays[] = { m_tempArray.data(), outResult.data() };
     */
 
+    int offset_cols_begin = 0;
+    int offset_rows_begin = 0;
+    int offset_cols_end = 0;
+    int offset_rows_end = 0;
 
-    for(size_t iter = 0; iter < m_simulationProperties.GetNumIterations(); ++iter)
+    if (row_id == 0)
     {
+      offset_rows_begin += 2;
+    }
+    if (row_id == out_size_rows - 1)
+    {
+      offset_rows_end += 2;
+    }
+    if (col_id == 0)
+    {
+      offset_cols_begin += 2;
+    }
+    if (col_id == out_size_cols - 1)
+    {
+      offset_cols_end += 2;
+    }
+
+    if (m_rank == 4)
+    {
+      cout << "Offsets ==" << endl;
+      cout << offset_cols_begin << endl;
+      cout << "Offsets ==" << endl;
+      cout << offset_rows_begin << endl;
+      cout << "Offsets ==" << endl;
+      cout << offset_cols_end << endl;
+      cout << "Offsets ==" << endl;
+      cout << offset_rows_end << endl;
+    }
+
+
+    for (size_t iter = 0; iter < m_simulationProperties.GetNumIterations(); ++iter)
+    {
+
+      for(size_t i = 2 + offset_rows_begin; i < enlarged_tile_size_rows - offset_rows_end; ++i)
+      {
+            for(size_t j = 2 + offset_cols_begin; j < enlarged_tile_size_cols - offset_cols_end; ++j)
+            {
+                ComputePoint(workTempArrays[1], workTempArrays[0],
+                        domain_params_local_with_borders_recieved.data(),
+                        domain_map_local_with_borders_recieved.data(),
+                        i, j,
+                        enlarged_tile_size_cols,
+                        m_simulationProperties.GetAirFlowRate(),
+                        m_materialProperties.GetCoolerTemp());
+            }
+      }
+
       MPI_Request requests_simulation[total_request_count];
       int num_requests_simulation = 0;
       MPI_Barrier(MPI_COMM_WORLD);
@@ -1113,7 +1162,9 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         }
       }
 
-      MPI_Waitall(total_request_count, requests_simulation, NULL);
+        MPI_Waitall(total_request_count, requests_simulation, NULL);
+
+        swap(workTempArrays[0], workTempArrays[1]);
 
 
     }
