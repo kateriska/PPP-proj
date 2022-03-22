@@ -439,14 +439,14 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     string vector_res = "";
     cout << m_rank << endl;
-    for (size_t i = 0; i < init_temp.size(); ++i)
+    for (size_t i = 0; i < domain_params.size(); ++i)
     {
-      float item = init_temp.at(i);
+      float item = domain_params.at(i);
       vector_res.append(to_string(item));
       vector_res.append(", ");
     }
 
-
+    cout << "DOMAIN PARAMS ================" << endl;
     cout << vector_res << endl;
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -978,6 +978,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     MPI_Waitall(total_request_count, requests_domain_params, NULL);
     cout << "LLLLLLLLLLLLLL " << endl;
 
+    if (m_rank == 6) {
     cout << "Process with received values params" << m_rank << endl;
 
     for (size_t i = 0; i < domain_params_local_with_borders_recieved.size(); ++i)
@@ -987,7 +988,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       vector_res.append(";; ");
     }
 
-    cout << vector_res << endl;
+    cout << vector_res << endl;}
 
 
 
@@ -1162,146 +1163,60 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         }
       }
 
-        MPI_Waitall(total_request_count, requests_simulation, NULL);
-
-        swap(workTempArrays[0], workTempArrays[1]);
-
-
-    }
-
-    /*
-    int local_tile_size_x;
-    int local_tile_size_y;
-    int local_tile_size;
-
-    //int local_tile_size_x = m_materialProperties.GetInitTemp().size() / outSizeX;
-    //int local_tile_size_y =  m_materialProperties.GetInitTemp().size() / outSizeY;
-    //int local_tile_size = local_tile_size_x * local_tile_size_y;
-
-    cout << m_materialProperties.GetInitTemp().size() << endl;
-    local_tile_size_x = sqrt(m_materialProperties.GetInitTemp().size()) / outSizeX;
-    local_tile_size_y = sqrt(m_materialProperties.GetInitTemp().size()) / outSizeY;
-    local_tile_size = local_tile_size_x * local_tile_size_y;
-    cout << local_tile_size << endl;
+      MPI_Waitall(total_request_count, requests_simulation, NULL);
 
 
 
+      if (col_id == out_size_cols / 2 || m_rank == 0)
+      {
+        cout << "Middle " << m_rank << endl;
 
-    //cout << local_tile_size << endl;
-    //vector<float> local_tmp(outSizeX * outSizeY);
-    //vector<float> local_out(outSizeX * outSizeY);
+        if (m_rank == 0)
+        {
+          middleColAvgTemp = 0.0f;
+        }
+        else
+        {
+          middleColAvgTemp = ComputeMiddleColAvgTemp(workTempArrays[0], enlarged_tile_size_rows, enlarged_tile_size_cols);
+          cout << "Temperature " << middleColAvgTemp << endl;
+        }
+      }
+      MPI_Barrier(MPI_COMM_WORLD);
 
-    vector<float> init_temp;
-    vector<float> tmp_vector(m_materialProperties.GetInitTemp().size());
-    vector<float> out_result(m_materialProperties.GetInitTemp().size());
-    vector<int> domain_map(m_materialProperties.GetDomainMap().size());
-    vector<float> domain_params(m_materialProperties.GetDomainParams().size());
-
-    vector<float> init_temp_local(local_tile_size);
-    vector<float> tmp_vector_local(local_tile_size);
-    vector<float> out_result_local(local_tile_size);
-    vector<int> domain_map_local(local_tile_size);
-    vector<float> domain_params_local(local_tile_size);
-
-    //vector<float> init_temp_gathered(m_materialProperties.GetInitTemp().size());
-
-
-    //cout << init_temp_local.size() <<endl;
+      swap(workTempArrays[0], workTempArrays[1]);
 
 
 
-    if (m_rank == 0)
-    {
-    for (size_t i = 0; i < m_materialProperties.GetInitTemp().size(); ++i) {
-        init_temp.push_back(m_materialProperties.GetInitTemp().at(i));
-    }
 
-    cout << init_temp.size() << endl;
 
-    for (size_t i = 0; i < init_temp.size(); ++i) {
-        std::cout << init_temp.at(i) << "; ";
-    }
 
-    for (size_t i = 0; i < m_materialProperties.GetDomainParams().size(); ++i) {
-        domain_params.push_back(m_materialProperties.GetDomainParams().at(i));
-    }
-
-    for (size_t i = 0; i < m_materialProperties.GetDomainMap().size(); ++i) {
-        domain_map.push_back(m_materialProperties.GetDomainMap().at(i));
-    }
-    cout << "End of process 0" << endl;
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
 
-    /*
-    cout << m_materialProperties.GetInitTemp().size() << endl;
-    cout << m_materialProperties.GetDomainMap().size() << endl;
-    cout << m_materialProperties.GetDomainParams().size() << endl;
 
 
-    //int local_size = m_materialProperties.GetInitTemp().size() / m_size;
-    cout << "Call Scatter" << endl;
-    cout << init_temp_local.data() << endl;
-    int res = MPI_Scatter(init_temp.data(), local_tile_size, MPI_FLOAT,  init_temp_local.data(), local_tile_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
-    //cout << res << endl;
-    //MPI_Barrier(MPI_COMM_WORLD);
-    /*
-    MPI_Scatter(domain_map.data(), local_tile_size, MPI_INT,  domain_map_local.data(), local_tile_size, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Scatter(domain_params.data(), local_tile_size, MPI_FLOAT,  domain_params.data(), local_tile_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
-    MPI_Scatter(tmp_vector.data(), local_tile_size, MPI_FLOAT,  tmp_vector_local.data(), local_tile_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
-    MPI_Scatter(out_result.data(), local_tile_size, MPI_FLOAT,  out_result_local.data(), local_tile_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
-    //cout << init_temp_local.size() << endl;
 
-    //MPI_Barrier(MPI_COMM_WORLD);
-    string vector_res = "";
-    cout << m_rank << endl;
-    for (size_t i = 0; i < init_temp_local.size(); ++i)
+
+}
+
+float ParallelHeatSolver::ComputeMiddleColAvgTemp(const float *data, int enlarged_tile_size_rows, int enlarged_tile_size_cols) const
+{
+    float middleColAvgTemp = 0.0f;
+    float result = 0.0f;
+
+    for(size_t i = 2; i < enlarged_tile_size_rows - 2; ++i)
     {
-      int item = init_temp.at(i);
-      vector_res.append(to_string(item));
-      vector_res.append(", ");
+          for(size_t j = 2; j < enlarged_tile_size_cols - 2; ++j)
+          {
+              int index_1D = i * enlarged_tile_size_rows + j;
+              cout << "IMDEX" << index_1D << endl;
+              cout << "vaaaal" << data[index_1D] << endl;
+              middleColAvgTemp += data[index_1D];
+          }
     }
-    cout << vector_res << endl;
 
-    float *init_temp_gathered = NULL;
-    if (m_rank == 0)
-    {
-      init_temp_gathered = malloc(sizeof(float) * m_size * m_materialProperties.GetInitTemp().size());
-      //vector<float> init_temp_gathered(m_materialProperties.GetInitTemp().size());
-
-      MPI_Gather(init_temp_local.data(), local_tile_size, MPI_FLOAT, init_temp_gathered, local_tile_size, MPI_FLOAT, 0,
-           MPI_COMM_WORLD);
-
-    }
-    */
-
-
-
-    /*
-    std::copy(m_materialProperties.GetInitTemp().begin(),
-                m_materialProperties.GetInitTemp().end(), m_tempArray.begin());
-    std::copy(m_materialProperties.GetInitTemp().begin(),
-                m_materialProperties.GetInitTemp().end(), outResult.begin());
-    cout << m_materialProperties.GetInitTemp().size();
-
-
-
-
-
-    if (m_simulationProperties.GetDecompMode() == DECOMP_MODE_1D)
-    {
-
-    }
-    else
-    {
-
-    }
-    */
-
-
-
-
-
+    result = middleColAvgTemp / ((enlarged_tile_size_rows - 4) * (enlarged_tile_size_cols - 4));
+    return result;
 }
