@@ -21,6 +21,8 @@ using namespace std;
 
 #define FROM_RIGHT_RANK_TAG_COL_1 7
 #define FROM_RIGHT_RANK_TAG_COL_2 8
+
+#define AVERAGE_TEMP_TAG 9
 //#define FROM_LEFT_RANK_TAG 3
 //#define FROM_RIGHT_RANK_TAG 4
 
@@ -1067,9 +1069,9 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     for (size_t iter = 0; iter < m_simulationProperties.GetNumIterations(); ++iter)
     {
 
-      for(size_t i = 2 + offset_rows_begin; i < enlarged_tile_size_rows - offset_rows_end; ++i)
+      for(size_t i = 2 + offset_rows_begin; i < enlarged_tile_size_rows - offset_rows_end - 2; ++i)
       {
-            for(size_t j = 2 + offset_cols_begin; j < enlarged_tile_size_cols - offset_cols_end; ++j)
+            for(size_t j = 2 + offset_cols_begin; j < enlarged_tile_size_cols - offset_cols_end - 2; ++j)
             {
                 ComputePoint(workTempArrays[1], workTempArrays[0],
                         domain_params_local_with_borders_recieved.data(),
@@ -1166,7 +1168,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       MPI_Waitall(total_request_count, requests_simulation, NULL);
 
 
-
+      float final_iteration_temp = 0.0f;
       if (col_id == out_size_cols / 2 || m_rank == 0)
       {
         cout << "Middle " << m_rank << endl;
@@ -1180,8 +1182,39 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
           middleColAvgTemp = ComputeMiddleColAvgTemp(workTempArrays[0], enlarged_tile_size_rows, enlarged_tile_size_cols);
           cout << "Temperature " << middleColAvgTemp << endl;
         }
+
+        vector<float> all_average_temp(out_size_rows + 1);
+        MPI_Gather(&middleColAvgTemp, 1, MPI_FLOAT, &all_average_temp[0], 1, MPI_FLOAT, 0, MPI_COMM_MIDDLE_COLUMN);
+
+        if (m_rank == 0)
+        {
+          float all_average_temp_sum = 0;
+
+          for (size_t i = 0; i < all_average_temp.size(); ++i)
+          {
+            if (i == 0)
+            {
+              continue;
+            }
+            float item = all_average_temp.at(i);
+            all_average_temp_sum += item;
+          }
+
+          cout << "ALLLL SUM " << all_average_temp_sum << endl;
+
+          final_iteration_temp = all_average_temp_sum / (all_average_temp.size() - 1);
+        }
+
       }
+
+
+
       MPI_Barrier(MPI_COMM_WORLD);
+
+      if (m_rank == 0)
+      {
+        PrintProgressReport(iter, final_iteration_temp);
+      }
 
       swap(workTempArrays[0], workTempArrays[1]);
 
