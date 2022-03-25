@@ -441,14 +441,14 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     string vector_res = "";
     cout << m_rank << endl;
-    for (size_t i = 0; i < domain_params.size(); ++i)
+    for (size_t i = 0; i < init_temp.size(); ++i)
     {
-      float item = domain_params.at(i);
+      float item = init_temp.at(i);
       vector_res.append(to_string(item));
       vector_res.append(", ");
     }
 
-    cout << "DOMAIN PARAMS ================" << endl;
+    cout << "TEMP PARAMS ================" << endl;
     cout << vector_res << endl;
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -605,10 +605,10 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     int row_id = m_rank / out_size_cols;
     int col_id = m_rank % out_size_cols;
 
-    unsigned int down_rank = m_rank + out_size_cols;
-    unsigned int upper_rank = m_rank - out_size_cols;
-    unsigned int left_rank = m_rank - 1;
-    unsigned int right_rank = m_rank + 1;
+    int down_rank = m_rank + out_size_cols;
+    int upper_rank = m_rank - out_size_cols;
+    int left_rank = m_rank - 1;
+    int right_rank = m_rank + 1;
 
     vector<float> init_temp_local_with_borders_recieved;
     vector<float> init_temp_recieved(enlarged_tile_size);
@@ -696,7 +696,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     if (col_id != 0)
     {
-      if (left_rank <= m_size)
+      if (left_rank < m_size)
       {
          // <--------
         MPI_Isend(&init_temp_local_with_borders[2], 1, tile_col_t, left_rank, FROM_RIGHT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests[num_requests++]);
@@ -706,7 +706,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     if (col_id != out_size_cols - 1)
     {
-      if (right_rank <= m_size)
+      if (right_rank < m_size)
       { /// -------->
         MPI_Isend(&init_temp_local_with_borders[enlarged_tile_size_cols - 1 - 4], 1, tile_col_t, right_rank, FROM_LEFT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests[num_requests++]);
         MPI_Isend(&init_temp_local_with_borders[enlarged_tile_size_cols - 1 - 3], 1, tile_col_t, right_rank, FROM_LEFT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests[num_requests++]);
@@ -752,7 +752,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     if (col_id != out_size_cols - 1)
     {
-      if (right_rank <= m_size)
+      if (right_rank < m_size)
       {
         MPI_Irecv(&init_temp_local_with_borders_recieved[enlarged_tile_size_cols - 1 - 1], 1, tile_col_t, right_rank, FROM_RIGHT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests[num_requests++]);
         MPI_Irecv(&init_temp_local_with_borders_recieved[enlarged_tile_size_cols - 1], 1, tile_col_t, right_rank, FROM_RIGHT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests[num_requests++]);
@@ -762,7 +762,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     if (col_id != 0)
     {
-      if (left_rank <= m_size)
+      if (left_rank < m_size)
       {
         MPI_Irecv(&init_temp_local_with_borders_recieved[0], 1, tile_col_t, left_rank, FROM_LEFT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests[num_requests++]);
         MPI_Irecv(&init_temp_local_with_borders_recieved[1], 1, tile_col_t, left_rank, FROM_LEFT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests[num_requests++]);
@@ -770,6 +770,15 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     }
 
     MPI_Waitall(total_request_count, requests, NULL);
+
+    for (int i = 0; i < m_num; i++) {
+        MPI_Barrier(MPI_COMM_WORLD);
+
+        if (i == m_rank) {
+            printf("\nRank: %d\n", m_rank);
+            print_array(&init_temp_local_with_borders_recieved[0], enlarged_tile_size_cols, enlarged_tile_size_rows);
+        }
+    }
 
 
 
@@ -820,7 +829,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     if (col_id != 0)
     {
-      if (left_rank <= m_size)
+      if (left_rank < m_size)
       {
          // <--------
         MPI_Isend(&domain_map_local_with_borders[2], 1, tile_col_t, left_rank, FROM_RIGHT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_domain_map[num_requests++]);
@@ -830,7 +839,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     if (col_id != out_size_cols - 1)
     {
-      if (right_rank <= m_size)
+      if (right_rank < m_size)
       { /// -------->
         MPI_Isend(&domain_map_local_with_borders[enlarged_tile_size_cols - 1 - 4], 1, tile_col_t, right_rank, FROM_LEFT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_domain_map[num_requests++]);
         MPI_Isend(&domain_map_local_with_borders[enlarged_tile_size_cols - 1 - 3], 1, tile_col_t, right_rank, FROM_LEFT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_domain_map[num_requests++]);
@@ -862,7 +871,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     if (col_id != out_size_cols - 1)
     {
-      if (right_rank <= m_size)
+      if (right_rank < m_size)
       {
         MPI_Irecv(&domain_map_local_with_borders_recieved[enlarged_tile_size_cols - 1 - 1], 1, tile_col_t, right_rank, FROM_RIGHT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_domain_map[num_requests++]);
         MPI_Irecv(&domain_map_local_with_borders_recieved[enlarged_tile_size_cols - 1], 1, tile_col_t, right_rank, FROM_RIGHT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_domain_map[num_requests++]);
@@ -872,7 +881,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     if (col_id != 0)
     {
-      if (left_rank <= m_size)
+      if (left_rank < m_size)
       {
         MPI_Irecv(&domain_map_local_with_borders_recieved[0], 1, tile_col_t, left_rank, FROM_LEFT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_domain_map[num_requests++]);
         MPI_Irecv(&domain_map_local_with_borders_recieved[1], 1, tile_col_t, left_rank, FROM_LEFT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_domain_map[num_requests++]);
@@ -917,7 +926,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     if (col_id != 0)
     {
-      if (left_rank <= m_size)
+      if (left_rank < m_size)
       {
          // <--------
         MPI_Isend(&domain_params_local_with_borders[2], 1, tile_col_t, left_rank, FROM_RIGHT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
@@ -927,7 +936,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     if (col_id != out_size_cols - 1)
     {
-      if (right_rank <= m_size)
+      if (right_rank < m_size)
       { /// -------->
         MPI_Isend(&domain_params_local_with_borders[enlarged_tile_size_cols - 1 - 4], 1, tile_col_t, right_rank, FROM_LEFT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
         MPI_Isend(&domain_params_local_with_borders[enlarged_tile_size_cols - 1 - 3], 1, tile_col_t, right_rank, FROM_LEFT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
@@ -959,7 +968,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     if (col_id != out_size_cols - 1)
     {
-      if (right_rank <= m_size)
+      if (right_rank < m_size)
       {
         MPI_Irecv(&domain_params_local_with_borders_recieved[enlarged_tile_size_cols - 1 - 1], 1, tile_col_t, right_rank, FROM_RIGHT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
         MPI_Irecv(&domain_params_local_with_borders_recieved[enlarged_tile_size_cols - 1], 1, tile_col_t, right_rank, FROM_RIGHT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
@@ -969,7 +978,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     if (col_id != 0)
     {
-      if (left_rank <= m_size)
+      if (left_rank < m_size)
       {
         MPI_Irecv(&domain_params_local_with_borders_recieved[0], 1, tile_col_t, left_rank, FROM_LEFT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
         MPI_Irecv(&domain_params_local_with_borders_recieved[1], 1, tile_col_t, left_rank, FROM_LEFT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
@@ -1109,7 +1118,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
       if (col_id != 0)
       {
-        if (left_rank <= m_size)
+        if (left_rank < m_size)
         {
            // <--------
           MPI_Isend(&workTempArrays[0][0], 1, tile_col_t, left_rank, FROM_RIGHT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
@@ -1119,7 +1128,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
       if (col_id != out_size_cols - 1)
       {
-        if (right_rank <= m_size)
+        if (right_rank < m_size)
         { /// -------->
           MPI_Isend(&workTempArrays[0][enlarged_tile_size_cols - 1 - 1], 1, tile_col_t, right_rank, FROM_LEFT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
           MPI_Isend(&workTempArrays[0][enlarged_tile_size_cols - 1], 1, tile_col_t, right_rank, FROM_LEFT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
@@ -1149,7 +1158,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
       if (col_id != out_size_cols - 1)
       {
-        if (right_rank <= m_size)
+        if (right_rank < m_size)
         {
           MPI_Irecv(&workTempArrays[1][enlarged_tile_size_cols - 1 - 1], 1, tile_col_t, right_rank, FROM_RIGHT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
           MPI_Irecv(&workTempArrays[1][enlarged_tile_size_cols - 1], 1, tile_col_t, right_rank, FROM_RIGHT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
@@ -1158,7 +1167,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
       if (col_id != 0)
       {
-        if (left_rank <= m_size)
+        if (left_rank < m_size)
         {
           MPI_Irecv(&workTempArrays[1][0], 1, tile_col_t, left_rank, FROM_LEFT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
           MPI_Irecv(&workTempArrays[1][1], 1, tile_col_t, left_rank, FROM_LEFT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
@@ -1179,7 +1188,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         }
         else
         {
-          middleColAvgTemp = ComputeMiddleColAvgTemp(workTempArrays[0], enlarged_tile_size_rows, enlarged_tile_size_cols);
+          middleColAvgTemp = ComputeMiddleColAvgTemp(workTempArrays[0], enlarged_tile_size_rows, enlarged_tile_size_cols, out_size_rows, out_size_cols);
           cout << "Temperature " << middleColAvgTemp << endl;
         }
 
@@ -1234,11 +1243,55 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
 }
 
-float ParallelHeatSolver::ComputeMiddleColAvgTemp(const float *data, int enlarged_tile_size_rows, int enlarged_tile_size_cols) const
+float ParallelHeatSolver::ComputeMiddleColAvgTemp(const float *data, int enlarged_tile_size_rows, int enlarged_tile_size_cols, int out_size_rows, int out_size_cols) const
 {
     float middleColAvgTemp = 0.0f;
     float result = 0.0f;
 
+    if (out_size_cols != 1 && out_size_rows == 1)
+    {
+
+    }
+    else
+    {
+      int middle_column_tile_id = ((enlarged_tile_size_cols - 4) / 2) + 2 - 1;
+      //int row_id = m_rank / out_size_cols;
+      //int col_id = m_rank % out_size_cols;
+
+
+      for(size_t i = 2; i < enlarged_tile_size_rows - 2; ++i)
+      {
+            for(size_t j = 2; j < enlarged_tile_size_cols - 2; ++j)
+            {
+                int index_1D = i * enlarged_tile_size_rows + j;
+
+                int row_id = index_1D / enlarged_tile_size_rows;
+                int col_id = index_1D % enlarged_tile_size_cols;
+
+                if ((middle_column_tile_id == col_id && row_id != 0) || (middle_column_tile_id == col_id && row_id != 1) || (middle_column_tile_id == col_id && row_id != enlarged_tile_size_rows - 2) || (middle_column_tile_id == col_id && row_id != enlarged_tile_size_rows - 1))
+                {
+                  cout << "IMDEX" << index_1D << endl;
+                  middleColAvgTemp += data[index_1D];
+                }
+                /*
+                cout << "IMDEX" << index_1D << endl;
+                cout << "vaaaal" << data[index_1D] << endl;
+                middleColAvgTemp += data[index_1D];
+                */
+            }
+      }
+      /*
+      for (int i = 0; i < m_num; i++)
+      {
+        int column_rank = i % out_size_rows;
+        if (middle_column == column_rank || i == 0)
+        {
+          middle_ranks.push_back(i);
+        }
+      }
+      */
+    }
+    /*
     for(size_t i = 2; i < enlarged_tile_size_rows - 2; ++i)
     {
           for(size_t j = 2; j < enlarged_tile_size_cols - 2; ++j)
@@ -1248,8 +1301,8 @@ float ParallelHeatSolver::ComputeMiddleColAvgTemp(const float *data, int enlarge
               cout << "vaaaal" << data[index_1D] << endl;
               middleColAvgTemp += data[index_1D];
           }
-    }
+    }*/
 
-    result = middleColAvgTemp / ((enlarged_tile_size_rows - 4) * (enlarged_tile_size_cols - 4));
+    result = middleColAvgTemp / (enlarged_tile_size_rows - 4);
     return result;
 }
