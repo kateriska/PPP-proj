@@ -15,6 +15,9 @@
 
 #include "base_heat_solver.h"
 
+#include <string>
+using namespace std;
+
 /**
  * @brief The SequentialHeatSolver class implements reference sequential heat
  *        equation solver in 2D domain.

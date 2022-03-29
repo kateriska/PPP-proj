@@ -29,6 +29,18 @@ void SequentialHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> 
     // 2. Copy initial temperature into both working arrays
     std::copy(m_materialProperties.GetInitTemp().begin(),
               m_materialProperties.GetInitTemp().end(), m_tempArray.begin());
+
+    string vector_res = "";
+
+    for (size_t i = 0; i < m_tempArray.size(); i++)
+    {
+        float item = m_tempArray.at(i);
+        vector_res.append(to_string(item));
+        vector_res.append(", ");
+    }
+
+    cout << "TEMP PARAMS ================" << endl;
+    cout << vector_res << endl;
     std::copy(m_materialProperties.GetInitTemp().begin(),
               m_materialProperties.GetInitTemp().end(), outResult.begin());
 
