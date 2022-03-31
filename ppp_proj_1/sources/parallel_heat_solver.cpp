@@ -704,12 +704,20 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     }
   }
 
+  int edges_request_count = 0;
 
-
-
-
-
-
+  if ((row_id == 0 || row_id == out_size_rows - 1) && (col_id == 0 || col_id == out_size_cols - 1))
+  {
+    edges_request_count += 2;
+  }
+  else if (col_id == 0 || col_id == out_size_cols - 1 || row_id == 0 || row_id == out_size_rows - 1)
+  {
+    edges_request_count += 4;
+  }
+  else
+  {
+    edges_request_count += 8;
+  }
 
     cout << "Upcoming requests for rank " << m_rank << ":   " << total_request_count << endl;
 
@@ -809,6 +817,54 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
 
     MPI_Waitall(total_request_count, requests, NULL);
+
+    MPI_Request requests_init_temp_recieved[edges_request_count];
+    num_requests = 0;
+
+    vector<float> init_temp_local_with_borders_recieved_with_edges;
+    for (size_t i = 0; i < init_temp_local_with_borders_recieved.size(); i++) {
+      float value = init_temp_local_with_borders_recieved.at(i);
+      init_temp_local_with_borders_recieved_with_edges.push_back(value);
+    }
+
+    if ((row_id != out_size_rows - 1 && col_id != 0) && (row_id != out_size_rows - 1) && (col_id != 0))
+    {
+      MPI_Irecv(&init_temp_local_with_borders_recieved_with_edges[48], 1, enlarge_tile_part_t, down_left_rank, FROM_DOWN_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_init_temp_recieved[num_requests++]);
+    }
+    if ((row_id != out_size_rows - 1 && col_id != out_size_cols - 1) && (row_id != out_size_rows - 1) && (col_id != out_size_cols - 1))
+    {
+      MPI_Irecv(&init_temp_local_with_borders_recieved_with_edges[54], 1, enlarge_tile_part_t, down_right_rank, FROM_DOWN_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_init_temp_recieved[num_requests++]);
+    }
+    if ((row_id != 0 && col_id != 0) && (row_id != 0) && (col_id != 0))
+    {
+      MPI_Irecv(&init_temp_local_with_borders_recieved_with_edges[0], 1, enlarge_tile_part_t, upper_left_rank, FROM_UPPER_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_init_temp_recieved[num_requests++]);
+    }
+    if ((row_id != 0 && col_id != out_size_cols - 1) && (row_id != 0) && (col_id != out_size_cols - 1))
+    {
+      MPI_Irecv(&init_temp_local_with_borders_recieved_with_edges[6], 1, enlarge_tile_part_t, upper_right_rank, FROM_UPPER_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_init_temp_recieved[num_requests++]);
+    }
+
+    if ((row_id != 0 && col_id != out_size_cols - 1) && (row_id != 0) && (col_id != out_size_cols - 1))
+    {
+      MPI_Isend(&init_temp_local_with_borders_recieved[20], 1, enlarge_tile_part_t, upper_right_rank, FROM_DOWN_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_init_temp_recieved[num_requests++]);
+    }
+    if ((row_id != 0 && col_id != 0) && (row_id != 0) && (col_id != 0))
+    {
+      MPI_Isend(&init_temp_local_with_borders_recieved[18], 1, enlarge_tile_part_t, upper_left_rank, FROM_DOWN_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_init_temp_recieved[num_requests++]);
+    }
+    if ((row_id != out_size_rows - 1 && col_id != out_size_cols - 1) && (row_id != out_size_rows - 1) && (col_id != out_size_cols - 1))
+    {
+      MPI_Isend(&init_temp_local_with_borders_recieved[36], 1, enlarge_tile_part_t, down_right_rank, FROM_UPPER_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_init_temp_recieved[num_requests++]);
+    }
+    if ((row_id != out_size_rows - 1 && col_id != 0) && (row_id != out_size_rows - 1) && (col_id != 0)) {
+
+      MPI_Isend(&init_temp_local_with_borders_recieved[34], 1, enlarge_tile_part_t, down_left_rank, FROM_UPPER_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_init_temp_recieved[num_requests++]);
+
+    }
+
+
+    MPI_Waitall(edges_request_count, requests_init_temp_recieved, NULL);
+
 
 
 
@@ -924,6 +980,75 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     MPI_Waitall(total_request_count, requests_domain_map, NULL);
 
+    vector<int> domain_map_local_with_borders_recieved_with_edges;
+
+    for (size_t i = 0; i < domain_map_local_with_borders_recieved.size(); i++) {
+      int value = domain_map_local_with_borders_recieved.at(i);
+      domain_map_local_with_borders_recieved_with_edges.push_back(value);
+    }
+
+
+
+
+    MPI_Request requests_domain_map_recieved[edges_request_count];
+    num_requests = 0;
+
+    if ((row_id != out_size_rows - 1 && col_id != 0) && (row_id != out_size_rows - 1) && (col_id != 0))
+    {
+      //cout << "Rank " << m_rank << endl;
+      //cout << down_left_rank << endl;
+      MPI_Irecv(&domain_map_local_with_borders_recieved_with_edges[48], 1, enlarge_tile_part_t, down_left_rank, FROM_DOWN_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_map_recieved[num_requests++]);
+
+    }
+    if ((row_id != out_size_rows - 1 && col_id != out_size_cols - 1) && (row_id != out_size_rows - 1) && (col_id != out_size_cols - 1))
+    {
+      //cout << "Rank " << m_rank << endl;
+      //cout << down_right_rank << endl;
+      MPI_Irecv(&domain_map_local_with_borders_recieved_with_edges[54], 1, enlarge_tile_part_t, down_right_rank, FROM_DOWN_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_map_recieved[num_requests++]);
+
+    }
+    if ((row_id != 0 && col_id != 0) && (row_id != 0) && (col_id != 0))
+    {
+      //cout << "Rank " << m_rank << endl;
+      //cout << upper_left_rank << endl;
+      MPI_Irecv(&domain_map_local_with_borders_recieved_with_edges[0], 1, enlarge_tile_part_t, upper_left_rank, FROM_UPPER_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_map_recieved[num_requests++]);
+
+    }
+    if ((row_id != 0 && col_id != out_size_cols - 1) && (row_id != 0) && (col_id != out_size_cols - 1))
+    {
+      //cout << "Rank " << m_rank << endl;
+      //cout << upper_right_rank << endl;
+      MPI_Irecv(&domain_map_local_with_borders_recieved_with_edges[6], 1, enlarge_tile_part_t, upper_right_rank, FROM_UPPER_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_map_recieved[num_requests++]);
+
+    }
+
+    //if (row_id != 0 || col_id != out_size_cols - 1) {
+    if ((row_id != 0 && col_id != out_size_cols - 1) && (row_id != 0) && (col_id != out_size_cols - 1))
+    {
+      cout << "Rank " << m_rank << endl;
+      MPI_Isend(&domain_map_local_with_borders_recieved[20], 1, enlarge_tile_part_t, upper_right_rank, FROM_DOWN_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_map_recieved[num_requests++]);
+
+    }
+    if ((row_id != 0 && col_id != 0) && (row_id != 0) && (col_id != 0)) {
+
+      MPI_Isend(&domain_map_local_with_borders_recieved[18], 1, enlarge_tile_part_t, upper_left_rank, FROM_DOWN_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_map_recieved[num_requests++]);
+
+    }
+    //if (row_id != out_size_rows - 1 || col_id != out_size_cols - 1) {
+    if ((row_id != out_size_rows - 1 && col_id != out_size_cols - 1) && (row_id != out_size_rows - 1) && (col_id != out_size_cols - 1))
+    {
+      MPI_Isend(&domain_map_local_with_borders_recieved[36], 1, enlarge_tile_part_t, down_right_rank, FROM_UPPER_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_map_recieved[num_requests++]);
+
+    }
+    if ((row_id != out_size_rows - 1 && col_id != 0) && (row_id != out_size_rows - 1) && (col_id != 0)) {
+
+      MPI_Isend(&domain_map_local_with_borders_recieved[34], 1, enlarge_tile_part_t, down_left_rank, FROM_UPPER_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_map_recieved[num_requests++]);
+
+    }
+
+
+    MPI_Waitall(edges_request_count, requests_domain_map_recieved, NULL);
+
 
     vector<float> domain_params_local_with_borders_recieved;
 
@@ -932,19 +1057,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       domain_params_local_with_borders_recieved.push_back(value);
     }
 
-    if ((row_id == 0 || row_id == out_size_rows - 1) && (col_id == 0 || col_id == out_size_cols - 1))
-    {
-
-      total_request_count += 2;
-    }
-    else if (col_id == 0 || col_id == out_size_cols - 1)
-    {
-      total_request_count += 4;
-    }
-    else
-    {
-      total_request_count += 8;
-    }
 
     MPI_Request requests_domain_params[total_request_count];
     num_requests = 0;
@@ -992,28 +1104,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       }
     }
 
-    if (down_left_rank >= 0 && down_left_rank < m_size)
-    {
-      cout << down_left_rank << endl;
-      MPI_Irecv(&domain_params_local_with_borders_recieved[0], 1, resized_enlarge_tile_part_t, down_left_rank, FROM_DOWN_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
-    }
-    if (down_right_rank >= 0 && down_right_rank < m_size)
-    {
-      cout << down_right_rank << endl;
-      MPI_Irecv(&domain_params_local_with_borders_recieved[0], 1, resized_enlarge_tile_part_t, down_right_rank, FROM_DOWN_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
-    }
-    if (upper_left_rank >= 0 && upper_left_rank < m_size)
-    {
-      cout << upper_left_rank << endl;
-      MPI_Irecv(&domain_params_local_with_borders_recieved[0], 1, resized_enlarge_tile_part_t, upper_left_rank, FROM_UPPER_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
-    }
-    if (upper_right_rank >= 0 && upper_right_rank < m_size)
-    {
-      cout << upper_right_rank << endl;
-      MPI_Irecv(&domain_params_local_with_borders_recieved[0], 1, resized_enlarge_tile_part_t, upper_right_rank, FROM_UPPER_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
-    }
-
-
     if (row_id != 0)
     {
       if (upper_rank < m_size)
@@ -1053,61 +1143,83 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       }
     }
 
-    /*
-    int down_left_rank = m_rank + out_size_cols - 1;
-    int down_right_rank = m_rank + out_size_cols + 1;
-    int upper_left_rank = m_rank - out_size_cols - 1;
-    int upper_right_rank = m_rank - out_size_cols + 1;
-    */
-    /*
-    if (down_left_rank >= 0 && down_left_rank < m_size)
-    {
-      MPI_Irecv(&domain_params_local_with_borders_recieved[12], 1, resized_enlarge_tile_part_t, down_left_rank, FROM_DOWN_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
-    }
-    if (down_right_rank >= 0 && down_right_rank < m_size)
-    {
-      MPI_Irecv(&domain_params_local_with_borders_recieved[15], 1, resized_enlarge_tile_part_t, down_right_rank, FROM_DOWN_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
-    }
-    if (upper_left_rank >= 0 && upper_left_rank < m_size)
-    {
-      MPI_Irecv(&domain_params_local_with_borders_recieved[0], 1, resized_enlarge_tile_part_t, upper_left_rank, FROM_UPPER_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
-    }
-    if (upper_right_rank >= 0 && upper_right_rank < m_size)
-    {
-      MPI_Irecv(&domain_params_local_with_borders_recieved[3], 1, resized_enlarge_tile_part_t, upper_right_rank, FROM_UPPER_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
-    }
-    */
-
-    if (upper_right_rank >= 0 && upper_right_rank < m_size)
-    {
-      MPI_Isend(&domain_params_local_with_borders[0], 1, resized_enlarge_tile_part_t, upper_right_rank, FROM_DOWN_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
-    }
-    if (upper_left_rank >= 0 && upper_left_rank < m_size)
-    {
-      MPI_Isend(&domain_params_local_with_borders[0], 1, resized_enlarge_tile_part_t, upper_left_rank, FROM_DOWN_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
-    }
-    if (down_right_rank >= 0 && down_right_rank < m_size)
-    {
-      MPI_Isend(&domain_params_local_with_borders[0], 1, resized_enlarge_tile_part_t, down_right_rank, FROM_UPPER_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
-    }
-    if (down_left_rank >= 0 && down_left_rank < m_size)
-    {
-      MPI_Isend(&domain_params_local_with_borders[0], 1, resized_enlarge_tile_part_t, down_left_rank, FROM_UPPER_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
-    }
-
-
-
-
-
-
     MPI_Waitall(total_request_count, requests_domain_params, NULL);
+
+    vector<float> domain_params_local_with_borders_recieved_with_edges;
+
+    for (size_t i = 0; i < domain_params_local_with_borders_recieved.size(); i++) {
+      float value = domain_params_local_with_borders_recieved.at(i);
+      domain_params_local_with_borders_recieved_with_edges.push_back(value);
+    }
+
+
+
+
+    MPI_Request requests_domain_params_recieved[edges_request_count];
+    num_requests = 0;
+
+    if ((row_id != out_size_rows - 1 && col_id != 0) && (row_id != out_size_rows - 1) && (col_id != 0))
+    {
+      //cout << "Rank " << m_rank << endl;
+      //cout << down_left_rank << endl;
+      MPI_Irecv(&domain_params_local_with_borders_recieved_with_edges[48], 1, enlarge_tile_part_t, down_left_rank, FROM_DOWN_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params_recieved[num_requests++]);
+
+    }
+    if ((row_id != out_size_rows - 1 && col_id != out_size_cols - 1) && (row_id != out_size_rows - 1) && (col_id != out_size_cols - 1))
+    {
+      //cout << "Rank " << m_rank << endl;
+      //cout << down_right_rank << endl;
+      MPI_Irecv(&domain_params_local_with_borders_recieved_with_edges[54], 1, enlarge_tile_part_t, down_right_rank, FROM_DOWN_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params_recieved[num_requests++]);
+
+    }
+    if ((row_id != 0 && col_id != 0) && (row_id != 0) && (col_id != 0))
+    {
+      //cout << "Rank " << m_rank << endl;
+      //cout << upper_left_rank << endl;
+      MPI_Irecv(&domain_params_local_with_borders_recieved_with_edges[0], 1, enlarge_tile_part_t, upper_left_rank, FROM_UPPER_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params_recieved[num_requests++]);
+
+    }
+    if ((row_id != 0 && col_id != out_size_cols - 1) && (row_id != 0) && (col_id != out_size_cols - 1))
+    {
+      //cout << "Rank " << m_rank << endl;
+      //cout << upper_right_rank << endl;
+      MPI_Irecv(&domain_params_local_with_borders_recieved_with_edges[6], 1, enlarge_tile_part_t, upper_right_rank, FROM_UPPER_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params_recieved[num_requests++]);
+
+    }
+
+    //if (row_id != 0 || col_id != out_size_cols - 1) {
+    if ((row_id != 0 && col_id != out_size_cols - 1) && (row_id != 0) && (col_id != out_size_cols - 1))
+    {
+      cout << "Rank " << m_rank << endl;
+      MPI_Isend(&domain_params_local_with_borders_recieved[20], 1, enlarge_tile_part_t, upper_right_rank, FROM_DOWN_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params_recieved[num_requests++]);
+
+    }
+    if ((row_id != 0 && col_id != 0) && (row_id != 0) && (col_id != 0)) {
+
+      MPI_Isend(&domain_params_local_with_borders_recieved[18], 1, enlarge_tile_part_t, upper_left_rank, FROM_DOWN_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params_recieved[num_requests++]);
+
+    }
+    //if (row_id != out_size_rows - 1 || col_id != out_size_cols - 1) {
+    if ((row_id != out_size_rows - 1 && col_id != out_size_cols - 1) && (row_id != out_size_rows - 1) && (col_id != out_size_cols - 1))
+    {
+      MPI_Isend(&domain_params_local_with_borders_recieved[36], 1, enlarge_tile_part_t, down_right_rank, FROM_UPPER_LEFT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params_recieved[num_requests++]);
+
+    }
+    if ((row_id != out_size_rows - 1 && col_id != 0) && (row_id != out_size_rows - 1) && (col_id != 0)) {
+
+      MPI_Isend(&domain_params_local_with_borders_recieved[34], 1, enlarge_tile_part_t, down_left_rank, FROM_UPPER_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params_recieved[num_requests++]);
+
+    }
+
+
+    MPI_Waitall(edges_request_count, requests_domain_params, NULL);
 
     for (int i = 0; i < m_num; i++) {
         MPI_Barrier(MPI_COMM_WORLD);
 
         if (i == m_rank) {
             printf("\nRank: %d\n", m_rank);
-            print_array(&domain_params_local_with_borders_recieved[0], enlarged_tile_size_cols, enlarged_tile_size_rows);
+            print_array(&domain_params_local_with_borders_recieved_with_edges[0], enlarged_tile_size_cols, enlarged_tile_size_rows);
         }
     }
 
@@ -1150,7 +1262,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     }
     MPI_Barrier(MPI_COMM_WORLD);
     float middleColAvgTemp = 0.0f;
-    float *workTempArrays[] = {init_temp_local_with_borders_recieved.data(), init_temp_local_with_borders_recieved.data()};
+    float *workTempArrays[] = {init_temp_local_with_borders_recieved_with_edges.data(), init_temp_local_with_borders_recieved_with_edges.data()};
     //print_array(workTempArrays[0],8,8);
 
 
@@ -1207,8 +1319,8 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
             for(size_t j = 2 + offset_cols_begin; j < enlarged_tile_size_cols - offset_cols_end - 2; ++j)
             {
                 ComputePoint(workTempArrays[1], workTempArrays[0],
-                        domain_params_local_with_borders_recieved.data(),
-                        domain_map_local_with_borders_recieved.data(),
+                        domain_params_local_with_borders_recieved_with_edges.data(),
+                        domain_map_local_with_borders_recieved_with_edges.data(),
                         i, j,
                         enlarged_tile_size_cols,
                         m_simulationProperties.GetAirFlowRate(),
@@ -1216,9 +1328,11 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
             }
       }
 
+      MPI_Barrier(MPI_COMM_WORLD);
+
       MPI_Request requests_simulation[total_request_count];
       int num_requests_simulation = 0;
-      MPI_Barrier(MPI_COMM_WORLD);
+    //  MPI_Barrier(MPI_COMM_WORLD);
 
 
       if (row_id != out_size_rows - 1)
@@ -1226,8 +1340,8 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         if (down_rank < m_size)
         {
           // store to last two rows
-          MPI_Irecv(&workTempArrays[1][enlarged_tile_size_cols * (enlarged_tile_size_rows - 1 - 1)], 1, tile_row_t, down_rank, FROM_DOWN_RANK_TAG_ROW_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
-          MPI_Irecv(&workTempArrays[1][enlarged_tile_size_cols * (enlarged_tile_size_rows - 1)], 1, tile_row_t, down_rank, FROM_DOWN_RANK_TAG_ROW_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
+          MPI_Irecv(&workTempArrays[0][enlarged_tile_size_cols * (enlarged_tile_size_rows - 1 - 1)], 1, tile_row_t, down_rank, FROM_DOWN_RANK_TAG_ROW_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
+          MPI_Irecv(&workTempArrays[0][enlarged_tile_size_cols * (enlarged_tile_size_rows - 1)], 1, tile_row_t, down_rank, FROM_DOWN_RANK_TAG_ROW_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
         }
       }
 
@@ -1236,8 +1350,8 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         if (upper_rank < m_size)
         {
           // store to last two rows
-          MPI_Irecv(&workTempArrays[1][enlarged_tile_size_cols * 0], 1, tile_row_t, upper_rank, FROM_UPPER_RANK_TAG_ROW_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
-          MPI_Irecv(&workTempArrays[1][enlarged_tile_size_cols * 1], 1, tile_row_t, upper_rank, FROM_UPPER_RANK_TAG_ROW_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
+          MPI_Irecv(&workTempArrays[0][enlarged_tile_size_cols * 0], 1, tile_row_t, upper_rank, FROM_UPPER_RANK_TAG_ROW_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
+          MPI_Irecv(&workTempArrays[0][enlarged_tile_size_cols * 1], 1, tile_row_t, upper_rank, FROM_UPPER_RANK_TAG_ROW_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
         }
       }
 
@@ -1245,8 +1359,8 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       {
         if (right_rank < m_size)
         {
-          MPI_Irecv(&workTempArrays[1][enlarged_tile_size_cols - 1 - 1], 1, tile_col_t, right_rank, FROM_RIGHT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
-          MPI_Irecv(&workTempArrays[1][enlarged_tile_size_cols - 1], 1, tile_col_t, right_rank, FROM_RIGHT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
+          MPI_Irecv(&workTempArrays[0][enlarged_tile_size_cols - 1 - 1], 1, tile_col_t, right_rank, FROM_RIGHT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
+          MPI_Irecv(&workTempArrays[0][enlarged_tile_size_cols - 1], 1, tile_col_t, right_rank, FROM_RIGHT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
         }
       }
 
@@ -1254,8 +1368,8 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       {
         if (left_rank < m_size)
         {
-          MPI_Irecv(&workTempArrays[1][0], 1, tile_col_t, left_rank, FROM_LEFT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
-          MPI_Irecv(&workTempArrays[1][1], 1, tile_col_t, left_rank, FROM_LEFT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
+          MPI_Irecv(&workTempArrays[0][0], 1, tile_col_t, left_rank, FROM_LEFT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
+          MPI_Irecv(&workTempArrays[0][1], 1, tile_col_t, left_rank, FROM_LEFT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
         }
       }
 
@@ -1264,8 +1378,8 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         if (upper_rank < m_size)
         {
           // send two rows up from down rank
-          MPI_Isend(&workTempArrays[0][enlarged_tile_size_cols * 0], 1, tile_row_t, upper_rank, FROM_DOWN_RANK_TAG_ROW_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
-          MPI_Isend(&workTempArrays[0][enlarged_tile_size_cols * 1], 1, tile_row_t, upper_rank, FROM_DOWN_RANK_TAG_ROW_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
+          MPI_Isend(&workTempArrays[1][enlarged_tile_size_cols * 0], 1, tile_row_t, upper_rank, FROM_DOWN_RANK_TAG_ROW_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
+          MPI_Isend(&workTempArrays[1][enlarged_tile_size_cols * 1], 1, tile_row_t, upper_rank, FROM_DOWN_RANK_TAG_ROW_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
         }
       }
 
@@ -1273,8 +1387,8 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       {
         if (down_rank < m_size)
         {
-          MPI_Isend(&workTempArrays[0][enlarged_tile_size_cols * (enlarged_tile_size_rows - 1 - 1)], 1, tile_row_t, down_rank, FROM_UPPER_RANK_TAG_ROW_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
-          MPI_Isend(&workTempArrays[0][enlarged_tile_size_cols * (enlarged_tile_size_rows - 1)], 1, tile_row_t, down_rank, FROM_UPPER_RANK_TAG_ROW_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
+          MPI_Isend(&workTempArrays[1][enlarged_tile_size_cols * (enlarged_tile_size_rows - 1 - 1)], 1, tile_row_t, down_rank, FROM_UPPER_RANK_TAG_ROW_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
+          MPI_Isend(&workTempArrays[1][enlarged_tile_size_cols * (enlarged_tile_size_rows - 1)], 1, tile_row_t, down_rank, FROM_UPPER_RANK_TAG_ROW_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
         }
       }
 
@@ -1284,8 +1398,8 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         if (left_rank < m_size)
         {
            // <--------
-          MPI_Isend(&workTempArrays[0][0], 1, tile_col_t, left_rank, FROM_RIGHT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
-          MPI_Isend(&workTempArrays[0][1], 1, tile_col_t, left_rank, FROM_RIGHT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
+          MPI_Isend(&workTempArrays[1][0], 1, tile_col_t, left_rank, FROM_RIGHT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
+          MPI_Isend(&workTempArrays[1][1], 1, tile_col_t, left_rank, FROM_RIGHT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
         }
       }
 
@@ -1293,12 +1407,13 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       {
         if (right_rank < m_size)
         { /// -------->
-          MPI_Isend(&workTempArrays[0][enlarged_tile_size_cols - 1 - 1], 1, tile_col_t, right_rank, FROM_LEFT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
-          MPI_Isend(&workTempArrays[0][enlarged_tile_size_cols - 1], 1, tile_col_t, right_rank, FROM_LEFT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
+          MPI_Isend(&workTempArrays[1][enlarged_tile_size_cols - 1 - 1], 1, tile_col_t, right_rank, FROM_LEFT_RANK_TAG_COL_1, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
+          MPI_Isend(&workTempArrays[1][enlarged_tile_size_cols - 1], 1, tile_col_t, right_rank, FROM_LEFT_RANK_TAG_COL_2, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
         }
       }
 
       MPI_Waitall(total_request_count, requests_simulation, NULL);
+      MPI_Barrier(MPI_COMM_WORLD);
 
 
       float final_iteration_temp = 0.0f;
