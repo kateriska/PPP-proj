@@ -621,7 +621,9 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
   // float *init_temp_local = (float*)malloc(enlarged_tile_size * sizeof(float));
   MPI_Win win;
-  MPI_Win_create(init_temp_local, enlarged_tile_size * sizeof(float), sizeof(float), MPI_INFO_NULL, MPI_COMM_WORLD, &win);
+  float* win_memory;
+  //MPI_Win_create(init_temp_local, enlarged_tile_size * sizeof(float), sizeof(float), MPI_INFO_NULL, MPI_COMM_WORLD, &win);
+  MPI_Win_allocate(2 * enlarged_tile_size * sizeof(float), sizeof(float), MPI_INFO_NULL, MPI_COMM_WORLD, &win_memory, &win);
 
   MPI_Datatype tile_t, resized_tile_t;
   MPI_Type_vector(local_tile_size_rows, local_tile_size_cols, sqrt(domain_length), MPI_FLOAT, &tile_t);
@@ -1297,33 +1299,41 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       else
       {
         cout << "Using RMA " << endl;
+        int offset = enlarged_tile_size * (( iter + 1) % 2);
         MPI_Win_fence(0, win);
 
         // The execution of a put operation is similar to the execution of a send by the origin process and a matching receive by the target process. The obvious difference is that all arguments are provided by one call --- the call executed by the origin process.
 
         if (row_id != 0)
         {
-            MPI_Put(&workTempArrays[0][enlarged_tile_size_cols * 2], 2, tile_row_t, upper_rank, enlarged_tile_size_cols * (enlarged_tile_size_rows - 1 - 1), 2, tile_row_t, win);
+            // send two rows up from down rank
+            MPI_Put(&workTempArrays[0][enlarged_tile_size_cols * 2], 2, tile_row_t, upper_rank, enlarged_tile_size_cols * (enlarged_tile_size_rows - 1 - 1) + offset, 2, tile_row_t, win);
         }
 
         if (row_id != out_size_rows - 1)
         {
-            MPI_Put(&workTempArrays[0][enlarged_tile_size_cols * (enlarged_tile_size_rows - 1 - 3)], 2, tile_row_t, down_rank, enlarged_tile_size_cols * 0, 2, tile_row_t, win);
+            MPI_Put(&workTempArrays[0][enlarged_tile_size_cols * (enlarged_tile_size_rows - 1 - 3)], 2, tile_row_t, down_rank, enlarged_tile_size_cols * 0 + offset, 2, tile_row_t, win);
         }
-
         if (col_id != 0)
         {
              // <--------
-            MPI_Put(&workTempArrays[0][2], 1, tile_col_t, left_rank, enlarged_tile_size_cols - 1 - 1, 1, tile_col_t, win);
+            MPI_Put(&workTempArrays[0][2], 1, tile_col_t, left_rank, enlarged_tile_size_cols - 1 - 1 + offset, 1, tile_col_t, win);
         }
-
         if (col_id != out_size_cols - 1)
         {
           /// -------->
-            MPI_Put(&workTempArrays[0][enlarged_tile_size_cols - 1 - 3], 1, tile_col_t, right_rank, 0, 1, tile_col_t, win);
+            MPI_Put(&workTempArrays[0][enlarged_tile_size_cols - 1 - 3], 1, tile_col_t, right_rank, 0 + offset, 1, tile_col_t, win);
         }
 
+
+
         MPI_Win_fence(0, win);
+
+        if(m_rank == 1)
+        {
+          cout << "Recieved val" << endl;
+          //cout << &win[0] << endl;
+        }
 
       }
       MPI_Barrier(MPI_COMM_WORLD);
@@ -1370,12 +1380,12 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
       MPI_Barrier(MPI_COMM_WORLD);
 
+      swap(workTempArrays[0], workTempArrays[1]);
+
       if (m_rank == 0)
       {
         PrintProgressReport(iter, final_iteration_temp);
       }
-
-      swap(workTempArrays[0], workTempArrays[1]);
 
     }
     MPI_Barrier(MPI_COMM_WORLD);
