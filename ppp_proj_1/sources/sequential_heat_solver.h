@@ -39,6 +39,7 @@ public:
      * @param outResult Output array which is to be filled with computed temperature values.
      */
     virtual void RunSolver(std::vector<float, AlignedAllocator<float> > &outResult);
+    int count_1D_index(int row, int length_of_row, int column);
 
 protected:
     /**
