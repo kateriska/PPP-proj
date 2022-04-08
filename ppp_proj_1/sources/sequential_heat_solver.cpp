@@ -98,7 +98,7 @@ void SequentialHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> 
         middleColAvgTemp = ComputeMiddleColAvgTemp(workTempArrays[0]);
 
         // 6. Store the simulation state if appropriate (ie. every N-th iteration)
-        if(m_fileHandle != H5I_INVALID_HID && ((iter % m_simulationProperties.GetDiskWriteIntensity()) == 0))
+        if(m_fileHandle != H5I_INVALID_HID)
             StoreDataIntoFile(m_fileHandle, iter, workTempArrays[0]);
 
         // 7. Swap source and destination buffers

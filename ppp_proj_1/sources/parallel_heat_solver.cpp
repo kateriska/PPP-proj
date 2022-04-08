@@ -1223,6 +1223,52 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     }
 
 
+    /*
+    MPI_Type_vector(local_tile_size_rows, local_tile_size_cols, sqrt(domain_length), MPI_FLOAT, &tile_t);
+    MPI_Type_create_resized(tile_t, 0, sizeof(float), &resized_tile_t);
+    MPI_Type_commit(&tile_t);
+    MPI_Type_commit(&resized_tile_t);
+    */
+    MPI_Datatype worker_tile_t;
+    int tile[2];
+    int worker_size[2];
+    int worker_start[2];
+    worker_size[0] = enlarged_tile_size_rows;
+    worker_size[1] = enlarged_tile_size_cols;
+    tile[0] = local_tile_size_rows;
+    tile[1] = local_tile_size_cols;
+    worker_start[0] = 2;
+    worker_start[1] = 2;
+    float result_domain[domain_length];
+
+    MPI_Type_create_subarray(2, worker_size, tile, worker_start, MPI_ORDER_C, MPI_FLOAT, &worker_tile_t);
+    MPI_Type_commit(&worker_tile_t);
+
+    MPI_Datatype farmer_matrix_t;
+    MPI_Datatype resized_farmer_matrix_t;
+    int farmer_size[2];
+    int farmer_start[2];
+    farmer_size[0] = sqrt(domain_length);
+    farmer_size[1] = sqrt(domain_length);
+    farmer_start[0] = 0;
+    farmer_start[1] = 0;
+
+    MPI_Type_create_subarray(2, farmer_size, tile, farmer_start, MPI_ORDER_C, MPI_FLOAT, &farmer_matrix_t);
+    MPI_Type_create_resized(farmer_matrix_t, 0, sizeof(float), &resized_farmer_matrix_t);
+    MPI_Type_commit(&farmer_matrix_t);
+    MPI_Type_commit(&resized_farmer_matrix_t);
+
+    // MPI_Scatterv(&(init_temp[0]), counts, displacements, resized_tile_t, &(init_temp_local[0]), local_tile_size_cols * local_tile_size_rows, MPI_FLOAT, 0, MPI_COMM_WORLD);
+    MPI_Gatherv(&workTempArrays[0][0], 1, worker_tile_t, &result_domain[0], counts, displacements, resized_farmer_matrix_t, 0, MPI_COMM_WORLD);
+
+    if (m_rank == 0)
+    {
+      cout << "Printing whole domain" << endl;
+      print_array(result_domain, sqrt(domain_length), sqrt(domain_length));
+    }
+
+    float whole_domain_temp_snapshot[domain_length]; // snapshot of whole domain result for outputing into file by rank 0 sequentially
+
     for (size_t iter = 0; iter < m_simulationProperties.GetNumIterations(); ++iter)
     {
 
@@ -1307,7 +1353,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         if (row_id != 0)
         {
             // send two rows up from down rank
-            MPI_Put(&workTempArrays[0][enlarged_tile_size_cols * 2], 2, tile_row_t, upper_rank, enlarged_tile_size_cols * (enlarged_tile_size_rows - 1 - 1) + offset, 2, tile_row_t, win);
+            MPI_Put(&workTempArrays[0][enlarged_tile_size_cols * 2], 2, tile_row_t, upper_rank, (enlarged_tile_size_cols * (enlarged_tile_size_rows - 1 - 1)) + offset, 2, tile_row_t, win);
         }
 
         if (row_id != out_size_rows - 1)
@@ -1325,15 +1371,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
             MPI_Put(&workTempArrays[0][enlarged_tile_size_cols - 1 - 3], 1, tile_col_t, right_rank, 0 + offset, 1, tile_col_t, win);
         }
 
-
-
         MPI_Win_fence(0, win);
-
-        if(m_rank == 1)
-        {
-          cout << "Recieved val" << endl;
-          //cout << &win[0] << endl;
-        }
 
       }
       MPI_Barrier(MPI_COMM_WORLD);
@@ -1380,12 +1418,29 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
       MPI_Barrier(MPI_COMM_WORLD);
 
+
+
+      if (!m_simulationProperties.GetOutputFileName().empty() && ((iter % m_simulationProperties.GetDiskWriteIntensity()) == 0)) {
+            if (!m_simulationProperties.IsUseParallelIO())
+            {
+              MPI_Gatherv(&workTempArrays[0][0], 1, worker_tile_t, &whole_domain_temp_snapshot[0], counts, displacements, resized_farmer_matrix_t, 0, MPI_COMM_WORLD);
+              if (m_rank == 0)
+              {
+                StoreDataIntoFile(m_fileHandle, iter, &whole_domain_temp_snapshot[0]);
+              }
+            }
+      }
+
       swap(workTempArrays[0], workTempArrays[1]);
 
       if (m_rank == 0)
       {
         PrintProgressReport(iter, final_iteration_temp);
       }
+
+
+
+
 
     }
     MPI_Barrier(MPI_COMM_WORLD);
