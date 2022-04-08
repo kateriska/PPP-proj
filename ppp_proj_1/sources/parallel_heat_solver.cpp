@@ -70,6 +70,14 @@ ParallelHeatSolver::ParallelHeatSolver(SimulationProperties &simulationProps,
     }
     }
 
+    else if (simulationProps.IsUseParallelIO() == true)
+    {
+      hid_t access_property_list = H5Pcreate(H5P_FILE_ACCESS);
+      H5Pset_fapl_mpio(access_property_list, MPI_COMM_WORLD, MPI_INFO_NULL);
+      m_fileHandle.Set(H5Fcreate(simulationProps.GetOutputFileName("par").c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, access_property_list), H5Fclose);
+      H5Pclose(access_property_list);
+    }
+
 }
 
 ParallelHeatSolver::~ParallelHeatSolver()
@@ -1260,6 +1268,46 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     // MPI_Scatterv(&(init_temp[0]), counts, displacements, resized_tile_t, &(init_temp_local[0]), local_tile_size_cols * local_tile_size_rows, MPI_FLOAT, 0, MPI_COMM_WORLD);
     MPI_Gatherv(&workTempArrays[0][0], 1, worker_tile_t, &result_domain[0], counts, displacements, resized_farmer_matrix_t, 0, MPI_COMM_WORLD);
+
+    const char* fileName    = "File1.h5";
+      const char* datasetName = "Dataset-1";
+
+      if (m_rank == 0)
+      {
+        // 1. Declare an HDF5 file.
+        hid_t file = H5I_INVALID_HID;
+
+        // 2. Create a file with write permission. Use such a flag that overrides existing file.
+        //    The list of flags is in the header file called H5Fpublic.h
+        cout << "Creating file" << endl;
+        file = H5Fcreate(fileName, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+
+        // 3. Create file and memory spaces. We will only write a single value.
+        const hsize_t rank = 1;
+        const hsize_t size = 1;
+
+        hid_t filespace = H5Screate_simple(rank, &size, nullptr);
+        hid_t memspace  = H5Screate_simple(rank, &size, nullptr);
+
+        // 4. Create a dataset of a size [1] and int datatype.
+        //    The list of predefined datatypes can be found in H5Tpublic.h
+        hid_t dataset   = H5Dcreate(file, datasetName, H5T_NATIVE_INT, filespace,
+                                    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+
+        //5. Write value into the dataset.
+        cout << "Write scalar value" << endl;
+        const int value  = 128;
+        H5Dwrite(dataset, H5T_NATIVE_INT, filespace, filespace, H5P_DEFAULT, &value);
+
+        // 6. Close dataset.
+        H5Dclose(dataset);
+
+        // 7. Close file
+
+        H5Fclose(file);
+      }
 
     if (m_rank == 0)
     {
