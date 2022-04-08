@@ -412,6 +412,25 @@ int ParallelHeatSolver::count_1D_index(int row, int length_of_row, int column)
   return index_1D;
 }
 
+float* ParallelHeatSolver::TrimTileWithoutBorders(float* arr, int enlarged_tile_size_rows, int enlarged_tile_size_cols, float* result)
+{
+  //float result[(enlarged_tile_size_rows - 4) * (enlarged_tile_size_cols - 4)];
+  int result_index = 0;
+  for(size_t i = 2; i < enlarged_tile_size_rows - 2; ++i)
+  {
+        for(size_t j = 2; j < enlarged_tile_size_cols - 2; ++j)
+        {
+            int index_1D = count_1D_index(i, enlarged_tile_size_cols, j);
+            result[result_index] = arr[index_1D];
+            result_index++;
+        }
+  }
+
+  print_array(result, enlarged_tile_size_rows - 4, enlarged_tile_size_cols - 4);
+
+  return result;
+}
+
 
 
 
@@ -1309,10 +1328,42 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         H5Fclose(file);
       }
 
+      hid_t filespace;
+      hid_t memspace;
+      hid_t dataset;
+      hid_t xferPList;
+
+    if (!m_simulationProperties.GetOutputFileName().empty() && m_simulationProperties.IsUseParallelIO())
+    {
+        hsize_t datasetSize[] = {hsize_t(sqrt(domain_length)), hsize_t(sqrt(domain_length))};
+        hsize_t memSize[]     = {hsize_t(local_tile_size_rows), hsize_t(local_tile_size_cols)};
+
+        filespace = H5Screate_simple(2, datasetSize, nullptr);
+        memspace  = H5Screate_simple(2, memSize,     nullptr);
+
+        xferPList = H5Pcreate(H5P_DATASET_XFER);
+        H5Pset_dxpl_mpio(xferPList, H5FD_MPIO_COLLECTIVE);
+
+        dataset = H5Dcreate(m_fileHandle, "snapshot_dataset", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+        hsize_t slabStart[] = {hsize_t(local_tile_size_rows * m_rank), 0};
+        hsize_t slabSize[]  = {hsize_t(local_tile_size_rows), hsize_t(local_tile_size_cols)};
+
+        H5Sselect_hyperslab(filespace, H5S_SELECT_SET, slabStart, nullptr, slabSize, nullptr);
+    }
+
     if (m_rank == 0)
     {
       cout << "Printing whole domain" << endl;
       print_array(result_domain, sqrt(domain_length), sqrt(domain_length));
+
+      cout << "Printing my tile without borders" << endl;
+      float *result_tile;
+      float result[local_tile_size];
+      result_tile = TrimTileWithoutBorders(&domain_params_local_with_borders_recieved_with_edges[0], enlarged_tile_size_rows, enlarged_tile_size_cols, result);
+      cout << "HHHH " << endl;
+      cout << result_tile << endl;
+      print_array(result_tile, local_tile_size_rows, local_tile_size_cols);
     }
 
     float whole_domain_temp_snapshot[domain_length]; // snapshot of whole domain result for outputing into file by rank 0 sequentially
@@ -1492,6 +1543,12 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     }
     MPI_Barrier(MPI_COMM_WORLD);
+
+    if (!m_simulationProperties.GetOutputFileName().empty() && m_simulationProperties.IsUseParallelIO())
+    {
+      H5Dclose(dataset);
+    }
+
 
 }
 

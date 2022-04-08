@@ -78,6 +78,7 @@ public:
     vector<float> Enlarge1DTile(float *input_arr, int local_tile_size);
     float ComputeMiddleColAvgTemp(const float *data, int enlarged_tile_size_rows, int enlarged_tile_size_cols, int out_size_rows, int out_size_cols, int middle_item_tile_col_id, int m_rank) const;
     int count_1D_index(int row, int length_of_row, int column);
+    float* TrimTileWithoutBorders(float* arr, int enlarged_tile_size_rows, int enlarged_tile_size_cols, float* result);
 
 
 
