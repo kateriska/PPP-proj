@@ -1346,7 +1346,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
         dataset = H5Dcreate(m_fileHandle, "snapshot_dataset", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-        hsize_t slabStart[] = {hsize_t(local_tile_size_rows * m_rank), 0};
+        hsize_t slabStart[] = {hsize_t(row_id * local_tile_size_rows), hsize_t(col_id * local_tile_size_cols)};
         hsize_t slabSize[]  = {hsize_t(local_tile_size_rows), hsize_t(local_tile_size_cols)};
 
         H5Sselect_hyperslab(filespace, H5S_SELECT_SET, slabStart, nullptr, slabSize, nullptr);
@@ -1367,6 +1367,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     }
 
     float whole_domain_temp_snapshot[domain_length]; // snapshot of whole domain result for outputing into file by rank 0 sequentially
+    MPI_Win_fence(0, win);
 
     for (size_t iter = 0; iter < m_simulationProperties.GetNumIterations(); ++iter)
     {
@@ -1445,6 +1446,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       {
         cout << "Using RMA " << endl;
         int offset = enlarged_tile_size * (( iter + 1) % 2);
+        cout << "OFFSET " << offset << endl;
         MPI_Win_fence(0, win);
 
         // The execution of a put operation is similar to the execution of a send by the origin process and a matching receive by the target process. The obvious difference is that all arguments are provided by one call --- the call executed by the origin process.
@@ -1457,7 +1459,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
         if (row_id != out_size_rows - 1)
         {
-            MPI_Put(&workTempArrays[0][enlarged_tile_size_cols * (enlarged_tile_size_rows - 1 - 3)], 2, tile_row_t, down_rank, enlarged_tile_size_cols * 0 + offset, 2, tile_row_t, win);
+            MPI_Put(&workTempArrays[0][enlarged_tile_size_cols * (enlarged_tile_size_rows - 1 - 3)], 2, tile_row_t, down_rank, (enlarged_tile_size_cols * 0) + offset, 2, tile_row_t, win);
         }
         if (col_id != 0)
         {
@@ -1519,14 +1521,26 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
 
 
-      if (!m_simulationProperties.GetOutputFileName().empty() && ((iter % m_simulationProperties.GetDiskWriteIntensity()) == 0)) {
-            if (!m_simulationProperties.IsUseParallelIO())
+      if (!m_simulationProperties.GetOutputFileName().empty()) {
+            if (!m_simulationProperties.IsUseParallelIO() && ((iter % m_simulationProperties.GetDiskWriteIntensity()) == 0))
             {
               MPI_Gatherv(&workTempArrays[0][0], 1, worker_tile_t, &whole_domain_temp_snapshot[0], counts, displacements, resized_farmer_matrix_t, 0, MPI_COMM_WORLD);
               if (m_rank == 0)
               {
                 StoreDataIntoFile(m_fileHandle, iter, &whole_domain_temp_snapshot[0]);
               }
+            }
+            else if (m_simulationProperties.IsUseParallelIO())
+            {
+              cout << "Iter " << iter << endl;
+              if (iter ==  m_simulationProperties.GetNumIterations() - 1) {
+              cout << "JJJJ" << endl;
+              float *tile_snapshot;
+              float tile_result[local_tile_size];
+              tile_snapshot = TrimTileWithoutBorders(&workTempArrays[0][0], enlarged_tile_size_rows, enlarged_tile_size_cols, tile_result);
+              print_array(tile_snapshot, local_tile_size_rows, local_tile_size_cols);
+              H5Dwrite(dataset, H5T_NATIVE_FLOAT, memspace, filespace, xferPList, &tile_snapshot[0]);
+            }
             }
       }
 
