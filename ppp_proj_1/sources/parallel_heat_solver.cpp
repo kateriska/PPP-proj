@@ -648,10 +648,10 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
   assert(domain_map_local != NULL);
 
   // float *init_temp_local = (float*)malloc(enlarged_tile_size * sizeof(float));
-  MPI_Win win;
-  float* win_memory;
+  //MPI_Win win;
+  //float* win_memory;
   //MPI_Win_create(init_temp_local, enlarged_tile_size * sizeof(float), sizeof(float), MPI_INFO_NULL, MPI_COMM_WORLD, &win);
-  MPI_Win_allocate(2 * enlarged_tile_size * sizeof(float), sizeof(float), MPI_INFO_NULL, MPI_COMM_WORLD, &win_memory, &win);
+  //MPI_Win_allocate(2 * enlarged_tile_size * sizeof(float), sizeof(float), MPI_INFO_NULL, MPI_COMM_WORLD, &win_memory, &win);
 
   MPI_Datatype tile_t, resized_tile_t;
   MPI_Type_vector(local_tile_size_rows, local_tile_size_cols, sqrt(domain_length), MPI_FLOAT, &tile_t);
@@ -1205,7 +1205,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     //cout << vector_res << endl;
     */
 
-    MPI_Win_fence(0, win);
+
 
 
     if (m_rank == 0)
@@ -1214,7 +1214,34 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     }
     MPI_Barrier(MPI_COMM_WORLD);
     float middleColAvgTemp = 0.0f;
-    float *workTempArrays[] = {init_temp_local_with_borders_recieved_with_edges.data(), init_temp_local_with_borders_recieved_with_edges.data()};
+    //float *workTempArrays[] = {init_temp_local_with_borders_recieved_with_edges.data(), init_temp_local_with_borders_recieved_with_edges.data()};
+
+    MPI_Win win;
+    float* win_memory;
+    MPI_Win_allocate(2 * enlarged_tile_size * sizeof(float), sizeof(float), MPI_INFO_NULL, MPI_COMM_WORLD, &win_memory, &win);
+
+    float *workTempArrays[2];
+    if (m_simulationProperties.IsRunParallelP2P())
+    {
+      workTempArrays[0] = init_temp_local_with_borders_recieved_with_edges.data();
+      workTempArrays[1] = init_temp_local_with_borders_recieved_with_edges.data();
+    }
+    else if (m_simulationProperties.IsRunParallelRMA())
+    {
+      float* win_memory_data1 = win_memory;
+      float* win_memory_data2 = win_memory + enlarged_tile_size;
+
+      for (int i = 0; i < enlarged_tile_size; i++)
+      {
+        win_memory_data1[i] = init_temp_local_with_borders_recieved_with_edges[i];
+      }
+      copy(win_memory_data1, win_memory_data1 + enlarged_tile_size, win_memory_data2);
+      workTempArrays[0] = win_memory_data1;
+      workTempArrays[1] = win_memory_data2;
+    }
+
+
+
 
     int offset_cols_begin = 0;
     int offset_rows_begin = 0;
@@ -1329,7 +1356,8 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     }
 
     float whole_domain_temp_snapshot[domain_length]; // snapshot of whole domain result for outputing into file by rank 0 sequentially
-    MPI_Win_fence(0, win);
+
+    int iteration_offset = 0;
 
 
     for (size_t iter = 0; iter < m_simulationProperties.GetNumIterations(); ++iter)
@@ -1349,7 +1377,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
             }
       }
 
-      MPI_Barrier(MPI_COMM_WORLD);
+
 
       if (m_simulationProperties.IsRunParallelP2P()) {
       MPI_Request requests_simulation[total_request_count];
@@ -1403,12 +1431,17 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       }
 
       MPI_Waitall(total_request_count, requests_simulation, NULL);
+
+
+
+
     }
 
       else
       {
+
         cout << "Using RMA " << endl;
-        int offset = enlarged_tile_size * (( iter + 1) % 2);
+        int offset = enlarged_tile_size * iteration_offset;
         cout << "OFFSET " << offset << endl;
         MPI_Win_fence(0, win);
 
@@ -1416,6 +1449,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
         if (row_id != 0)
         {
+            cout << "Sending" << endl;
             // send two rows up from down rank
             MPI_Put(&workTempArrays[0][enlarged_tile_size_cols * 2], 2, tile_row_t, upper_rank, (enlarged_tile_size_cols * (enlarged_tile_size_rows - 1 - 1)) + offset, 2, tile_row_t, win);
         }
@@ -1437,8 +1471,32 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
         MPI_Win_fence(0, win);
 
+
+        if (iteration_offset == 1)
+        {
+          iteration_offset = 0;
+        }
+        else if (iteration_offset == 0)
+        {
+          iteration_offset = 1;
+        }
+
+
+
+
       }
-      MPI_Barrier(MPI_COMM_WORLD);
+
+      if (m_rank == 5)
+      {
+        cout << "Rank 5" << endl;
+        print_array(workTempArrays[0], enlarged_tile_size_rows, enlarged_tile_size_cols);
+      }
+      if (m_rank == 6)
+      {
+        cout << "Rank 6" << endl;
+        print_array(workTempArrays[1], enlarged_tile_size_rows, enlarged_tile_size_cols);
+      }
+
 
 
       float final_iteration_temp = 0.0f;
@@ -1567,7 +1625,8 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     MPI_Gatherv(&workTempArrays[0][0], 1, worker_tile_t, &outResult[0], counts, displacements, resized_farmer_matrix_t, 0, MPI_COMM_WORLD);
 
-  
+
+    MPI_Win_free(&win);
 
 
 
