@@ -87,6 +87,7 @@ protected:
     int m_size;     ///< Total number of processes in MPI_COMM_WORLD.
 
     AutoHandle<hid_t> m_fileHandle;                             ///< Output HDF5 file handle.
+    AutoHandle<hid_t> m_fileHandle_iteration;                             ///< Output HDF5 file handle.
     std::vector<float, AlignedAllocator<float> > m_tempArray;
 };
 

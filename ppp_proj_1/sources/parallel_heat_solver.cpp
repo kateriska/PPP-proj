@@ -44,7 +44,8 @@ using namespace std;
 ParallelHeatSolver::ParallelHeatSolver(SimulationProperties &simulationProps,
                                        MaterialProperties &materialProps)
     : BaseHeatSolver (simulationProps, materialProps),
-     m_fileHandle(H5I_INVALID_HID, static_cast<void (*)(hid_t )>(nullptr))
+     m_fileHandle(H5I_INVALID_HID, static_cast<void (*)(hid_t )>(nullptr)),
+     m_fileHandle_iteration(H5I_INVALID_HID, static_cast<void (*)(hid_t )>(nullptr))
 {
     MPI_Comm_size(MPI_COMM_WORLD, &m_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &m_rank);
@@ -1288,69 +1289,30 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     // MPI_Scatterv(&(init_temp[0]), counts, displacements, resized_tile_t, &(init_temp_local[0]), local_tile_size_cols * local_tile_size_rows, MPI_FLOAT, 0, MPI_COMM_WORLD);
     MPI_Gatherv(&workTempArrays[0][0], 1, worker_tile_t, &result_domain[0], counts, displacements, resized_farmer_matrix_t, 0, MPI_COMM_WORLD);
 
-    const char* fileName    = "File1.h5";
-      const char* datasetName = "Dataset-1";
 
-      if (m_rank == 0)
-      {
-        // 1. Declare an HDF5 file.
-        hid_t file = H5I_INVALID_HID;
+    hid_t filespace;
+    hid_t memspace;
+    hid_t dataset;
+    hid_t xferPList;
 
-        // 2. Create a file with write permission. Use such a flag that overrides existing file.
-        //    The list of flags is in the header file called H5Fpublic.h
-        cout << "Creating file" << endl;
-        file = H5Fcreate(fileName, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-
-
-        // 3. Create file and memory spaces. We will only write a single value.
-        const hsize_t rank = 1;
-        const hsize_t size = 1;
-
-        hid_t filespace = H5Screate_simple(rank, &size, nullptr);
-        hid_t memspace  = H5Screate_simple(rank, &size, nullptr);
-
-        // 4. Create a dataset of a size [1] and int datatype.
-        //    The list of predefined datatypes can be found in H5Tpublic.h
-        hid_t dataset   = H5Dcreate(file, datasetName, H5T_NATIVE_INT, filespace,
-                                    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-
-        //5. Write value into the dataset.
-        cout << "Write scalar value" << endl;
-        const int value  = 128;
-        H5Dwrite(dataset, H5T_NATIVE_INT, filespace, filespace, H5P_DEFAULT, &value);
-
-        // 6. Close dataset.
-        H5Dclose(dataset);
-
-        // 7. Close file
-
-        H5Fclose(file);
-      }
-
-      hid_t filespace;
-      hid_t memspace;
-      hid_t dataset;
-      hid_t xferPList;
+    hsize_t datasetSize[] = {hsize_t(sqrt(domain_length)), hsize_t(sqrt(domain_length))};
+    hsize_t memSize[]     = {hsize_t(local_tile_size_rows), hsize_t(local_tile_size_cols)};
+    hsize_t slabStart[] = {hsize_t(row_id * local_tile_size_rows), hsize_t(col_id * local_tile_size_cols)};
+    hsize_t slabSize[]  = {hsize_t(local_tile_size_rows), hsize_t(local_tile_size_cols)};
 
     if (!m_simulationProperties.GetOutputFileName().empty() && m_simulationProperties.IsUseParallelIO())
     {
-        hsize_t datasetSize[] = {hsize_t(sqrt(domain_length)), hsize_t(sqrt(domain_length))};
-        hsize_t memSize[]     = {hsize_t(local_tile_size_rows), hsize_t(local_tile_size_cols)};
-
         filespace = H5Screate_simple(2, datasetSize, nullptr);
         memspace  = H5Screate_simple(2, memSize,     nullptr);
 
         xferPList = H5Pcreate(H5P_DATASET_XFER);
         H5Pset_dxpl_mpio(xferPList, H5FD_MPIO_COLLECTIVE);
 
-        dataset = H5Dcreate(m_fileHandle, "snapshot_dataset", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-        hsize_t slabStart[] = {hsize_t(row_id * local_tile_size_rows), hsize_t(col_id * local_tile_size_cols)};
-        hsize_t slabSize[]  = {hsize_t(local_tile_size_rows), hsize_t(local_tile_size_cols)};
+        dataset = H5Dcreate(m_fileHandle, "result_domain_temperature", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
         H5Sselect_hyperslab(filespace, H5S_SELECT_SET, slabStart, nullptr, slabSize, nullptr);
     }
+
 
     if (m_rank == 0)
     {
@@ -1368,6 +1330,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     float whole_domain_temp_snapshot[domain_length]; // snapshot of whole domain result for outputing into file by rank 0 sequentially
     MPI_Win_fence(0, win);
+
 
     for (size_t iter = 0; iter < m_simulationProperties.GetNumIterations(); ++iter)
     {
@@ -1519,6 +1482,10 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
       MPI_Barrier(MPI_COMM_WORLD);
 
+      hid_t filespace_iteration;
+      hid_t memspace_iteration;
+      hid_t dataset_iteration;
+      hid_t xferPList_iteration;
 
 
       if (!m_simulationProperties.GetOutputFileName().empty()) {
@@ -1532,16 +1499,45 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
             }
             else if (m_simulationProperties.IsUseParallelIO())
             {
-              cout << "Iter " << iter << endl;
-              if (iter ==  m_simulationProperties.GetNumIterations() - 1) {
-              cout << "JJJJ" << endl;
+              // create new separate file for result temperature of this iteration
+              string input_file_name = m_simulationProperties.GetOutputFileName("par");
+              string iteration_file_name = "";
+              iteration_file_name.append(input_file_name.substr(0,input_file_name.size() - 1 - 2));
+              iteration_file_name.append("_iteration_");
+              iteration_file_name.append(to_string(iter));
+              iteration_file_name.append(".h5");
+
+              hid_t access_property_list = H5Pcreate(H5P_FILE_ACCESS);
+              H5Pset_fapl_mpio(access_property_list, MPI_COMM_WORLD, MPI_INFO_NULL);
+              m_fileHandle_iteration.Set(H5Fcreate(iteration_file_name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, access_property_list), H5Fclose);
+              H5Pclose(access_property_list);
+
+              // get current temperatures in tile without their borders which are shared
               float *tile_snapshot;
               float tile_result[local_tile_size];
               tile_snapshot = TrimTileWithoutBorders(&workTempArrays[0][0], enlarged_tile_size_rows, enlarged_tile_size_cols, tile_result);
               print_array(tile_snapshot, local_tile_size_rows, local_tile_size_cols);
+
+              string dataset_name = "";
+              dataset_name.append("iteration_");
+              dataset_name.append(to_string(iter));
+
+              // seting file for this iteration
+              filespace_iteration = H5Screate_simple(2, datasetSize, nullptr);
+              memspace_iteration  = H5Screate_simple(2, memSize,     nullptr);
+
+              xferPList_iteration = H5Pcreate(H5P_DATASET_XFER);
+              H5Pset_dxpl_mpio(xferPList_iteration, H5FD_MPIO_COLLECTIVE);
+
+              dataset_iteration = H5Dcreate(m_fileHandle_iteration, dataset_name.c_str(), H5T_NATIVE_FLOAT, filespace_iteration, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+              H5Sselect_hyperslab(filespace_iteration, H5S_SELECT_SET, slabStart, nullptr, slabSize, nullptr);
+              // write to separate file this iteration
+              H5Dwrite(dataset_iteration, H5T_NATIVE_FLOAT, memspace_iteration, filespace_iteration, xferPList_iteration, &tile_snapshot[0]);
+              // write current temparature to file which name was input via command line
               H5Dwrite(dataset, H5T_NATIVE_FLOAT, memspace, filespace, xferPList, &tile_snapshot[0]);
             }
-            }
+
       }
 
       swap(workTempArrays[0], workTempArrays[1]);
@@ -1551,6 +1547,11 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         PrintProgressReport(iter, final_iteration_temp);
       }
 
+      if (!m_simulationProperties.GetOutputFileName().empty() && m_simulationProperties.IsUseParallelIO())
+      {
+        H5Dclose(dataset_iteration);
+      }
+
 
 
 
@@ -1558,10 +1559,18 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
+
     if (!m_simulationProperties.GetOutputFileName().empty() && m_simulationProperties.IsUseParallelIO())
     {
       H5Dclose(dataset);
     }
+
+    MPI_Gatherv(&workTempArrays[0][0], 1, worker_tile_t, &outResult[0], counts, displacements, resized_farmer_matrix_t, 0, MPI_COMM_WORLD);
+
+  
+
+
+
 
 
 }
