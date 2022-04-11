@@ -1,10 +1,10 @@
 /**
  * @file    parallel_heat_solver.h
- * @author  xlogin00 <xlogin00@stud.fit.vutbr.cz>
+ * @author  xforto00 <xforto00@stud.fit.vutbr.cz>
  *
  * @brief   Course: PPP 2021/2022 - Project 1
  *
- * @date    2022-MM-DD
+ * @date    2022-04-11
  */
 
 #ifndef PARALLEL_HEAT_SOLVER_H
