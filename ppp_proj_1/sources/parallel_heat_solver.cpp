@@ -327,7 +327,7 @@ vector<int> ParallelHeatSolver::Enlarge1DTile(int *input_arr, int local_tile_siz
   enlarged_list.push_back(zeros_vector);
   enlarged_list.push_back(zeros_vector);
 
-  /*
+
   for (auto vect : enlarged_list) {
       // Each element of the list is
       // a vector itself
@@ -337,6 +337,7 @@ vector<int> ParallelHeatSolver::Enlarge1DTile(int *input_arr, int local_tile_siz
         output_vector_with_borders.push_back(currentVector.at(i));
       }
 
+      /*
       cout << "[ ";
 
       // Printing vector contents
@@ -345,8 +346,9 @@ vector<int> ParallelHeatSolver::Enlarge1DTile(int *input_arr, int local_tile_siz
 
       cout << ']';
       cout << '\n';
+      */
   }
-  */
+
 
   return output_vector_with_borders;
 }
@@ -377,7 +379,7 @@ vector<float> ParallelHeatSolver::Enlarge1DTile(float *input_arr, int local_tile
   enlarged_list.push_back(zeros_vector);
   enlarged_list.push_back(zeros_vector);
 
-  /*
+
   for (auto vect : enlarged_list) {
       // Each element of the list is
       // a vector itself
@@ -386,7 +388,7 @@ vector<float> ParallelHeatSolver::Enlarge1DTile(float *input_arr, int local_tile
       {
         output_vector_with_borders.push_back(currentVector.at(i));
       }
-
+      /*
       cout << "[ ";
 
       // Printing vector contents
@@ -395,8 +397,9 @@ vector<float> ParallelHeatSolver::Enlarge1DTile(float *input_arr, int local_tile
 
       cout << ']';
       cout << '\n';
+      */
   }
-  */
+
   return output_vector_with_borders;
 }
 
@@ -490,50 +493,87 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       /* recalculating params in case of 1D decomposition and getting correct composition of ranks
       e.g. 1D decomposition for 32 ranks and 16 x 16 grid, each rank has half of row of grid (16^2 / 32)
 
-      +----+----+
-      | 0  | 1  |
-      +----+----+
-      | 2  | 3  |
-      +----+----+
-      | 4  | 5  |
-      +----+----+
-      | 6  | 7  |
-      +----+----+
-      | 8  | 9  |
-      +----+----+
-      | 10 | 11 |
-      +----+----+
-      | 12 | 13 |
-      +----+----+
-      | 14 | 15 |
-      +----+----+
-      | 16 | 17 |
-      +----+----+
-      | 18 | 19 |
-      +----+----+
-      | 20 | 21 |
-      +----+----+
-      | 22 | 23 |
-      +----+----+
-      | 24 | 25 |
-      +----+----+
-      | 26 | 27 |
-      +----+----+
-      | 28 | 29 |
-      +----+----+
-      | 30 | 31 |
-      +----+----+
+0       +----+----+
+        | 0  | 1  |
+1       +----+----+
+        | 2  | 3  |
+2       +----+----+
+        | 4  | 5  |
+3       +----+----+
+        | 6  | 7  |
+4       +----+----+
+        | 8  | 9  |
+5       +----+----+
+        | 10 | 11 |
+6       +----+----+
+        | 12 | 13 |
+7       +----+----+
+        | 14 | 15 |
+8       +----+----+
+        | 16 | 17 |
+9       +----+----+
+        | 18 | 19 |
+10      +----+----+
+        | 20 | 21 |
+11      +----+----+
+        | 22 | 23 |
+12      +----+----+
+        | 24 | 25 |
+13      +----+----+
+        | 26 | 27 |
+14      +----+----+
+        | 28 | 29 |
+15      +----+----+
+        | 30 | 31 |
+16      +----+----+
 */
-      if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D)
+      if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && m_size >= sqrt(domain_length))
       {
         local_tile_size_cols = domain_length / out_size_cols;
         local_tile_size_rows = 1;
-        out_size_cols = sqrt(m_materialProperties.GetInitTemp().size()) / local_tile_size_cols;
+        out_size_cols = sqrt(domain_length) / local_tile_size_cols;
         out_size_rows = m_size / out_size_cols;
+
+        cout << "Out sizeh" << endl;
+        cout << out_size_cols << endl;
+        cout << out_size_rows << endl;
+        cout << local_tile_size_cols << endl;
+        cout << local_tile_size_rows << endl;
+      }
+
+      // 1 rank has more rows of domain
+      // e.g. 8 ranks for 16 x 16 grid, each rank has 2 rows of 16 x 16 grid, tile has dimensions 16 x 2, ranks are ordered into 1 x 8 decomposition of domain
+      /*
+0       +---+
+1       | 1 |
+2       +---+
+3       | 2 |
+4       +---+
+5       | 3 |
+6       +---+
+7       | 4 |
+8       +---+
+9       | 5 |
+10      +---+
+11      | 6 |
+12      +---+
+13      | 7 |
+14      +---+
+15      | 8 |
+16      +---+
+*/
+      else if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && m_size < sqrt(domain_length))
+      {
+        local_tile_size_cols = sqrt(domain_length);
+        local_tile_size_rows = sqrt(domain_length) / m_size;
+        out_size_cols = 1;
+        out_size_rows = sqrt(domain_length) / local_tile_size_rows;
 
         cout << "Out size" << endl;
         cout << out_size_cols << endl;
         cout << out_size_rows << endl;
+        cout << local_tile_size_cols << endl;
+        cout << local_tile_size_rows << endl;
       }
     }
 
@@ -593,7 +633,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     int res = 0;
     bool skip_to_next_row = false;
 
-    // counting of displacements for scatterv
+    // counting of displacements for scatterv, displacements are different for 1D and 2D decomposition
     if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D)
     {
       for(int x = 0; x < m_size; x++)
@@ -717,7 +757,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     vector<int> domain_map_local_with_borders;
 
     // tile is enlarged with constant borders
-    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D)
+    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && m_size >= sqrt(domain_length))
     {
       domain_map_local_with_borders = Enlarge1DTile(domain_map_local, local_tile_size_cols);
       domain_params_local_with_borders = Enlarge1DTile(domain_params_local, local_tile_size_cols);
@@ -948,7 +988,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     MPI_Waitall(edges_request_count, requests_init_temp_recieved, NULL);
 
     /*
-    specially for 1D decomposition:
+    specially for 1D decomposition when m_size >= sqrt(domain_length) (tile is one row (y dimension is 1)):
     enlarged tile with their borders (domain params example):
     // this is row overlapping my neighbor's upper neighbor rank (the rank is not same of these two upper borders)  0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
     // this is row overlapping my upper neighbor rank (as in 2D)                                                    0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
@@ -979,7 +1019,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       rows_second_neighbor_request_count += 2;
     }
 
-    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D)
+    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && m_size >= sqrt(domain_length))
     {
       num_requests = 0;
       MPI_Request requests_init_temp_recieved_1D[rows_second_neighbor_request_count];
@@ -1127,7 +1167,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     MPI_Waitall(edges_request_count, requests_domain_map_recieved, NULL);
 
-    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D)
+    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && m_size >= sqrt(domain_length))
     {
       num_requests = 0;
       MPI_Request requests_domain_map_recieved_1D[rows_second_neighbor_request_count];
@@ -1275,7 +1315,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     MPI_Waitall(edges_request_count, requests_domain_params, NULL);
 
-    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D)
+    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && m_size >= sqrt(domain_length))
     {
       num_requests = 0;
       MPI_Request requests_domain_params_recieved_1D[rows_second_neighbor_request_count];
@@ -1386,12 +1426,12 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       offset_cols_end += 2;
     }
 
-    // specially for 1D decomposition cause not only first and last row ranks but also second and last but one (predposledni) ranks contains static border corners
-    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && row_id - 1 == 0)
+    // specially for 1D decomposition if m_size >= sqrt(domain_length) cause not only first and last row ranks but also second and last but one (predposledni) ranks contains static border corners
+    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && row_id - 1 == 0 && m_size >= sqrt(domain_length))
     {
       offset_rows_begin += 1;
     }
-    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && row_id + 1 == out_size_rows - 1)
+    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && row_id + 1 == out_size_rows - 1 && m_size >= sqrt(domain_length))
     {
       offset_rows_end += 1;
     }
@@ -1547,9 +1587,9 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
         MPI_Waitall(total_request_count, requests_simulation, NULL);
 
-        // for 1D: tile is not only send to borders to my upper or down rank but also to borders of neighbor's upper or down rank
+        // for 1D if m_size >= sqrt(domain_length): tile is not only send to borders to my upper or down rank but also to borders of neighbor's upper or down rank
         // borders are basically overlapping not two ranks as in 2D but three ranks, because size of border is 2 and size of actual tile is 1
-        if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D)
+        if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && m_size >= sqrt(domain_length))
         {
           num_requests = 0;
           MPI_Request requests_simulation_1D[rows_second_neighbor_request_count];
@@ -1603,7 +1643,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
         MPI_Win_fence(0, win);
 
-        if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D)
+        if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && m_size >= sqrt(domain_length))
         {
           MPI_Win_fence(0, win);
 
@@ -1816,7 +1856,7 @@ float ParallelHeatSolver::ComputeMiddleColAvgTemp(const float *data, int enlarge
             if (m_rank == 2)
             {
                 float value = data[index_1D];
-                cout << "TEMP " << value << endl;
+                //cout << "TEMP " << value << endl;
             }
 
             // ignore border values of enlarged tile
@@ -1825,7 +1865,7 @@ float ParallelHeatSolver::ComputeMiddleColAvgTemp(const float *data, int enlarge
                   cout << "IMDEX" << index_1D << endl;
                   //cout << data[index_1D] << endl;
                   float value = data[index_1D];
-                  //cout << "MY TEMP CHOSEN"  << m_rank << " " <<  value << endl;
+                  cout << "TEMP OF MIDDLE COL OF "  << m_rank << ": " <<  value << endl;
                   middleColAvgTemp += value;
             }
         }
