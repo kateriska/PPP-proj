@@ -1436,6 +1436,14 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       offset_rows_end += 1;
     }
 
+    if (m_rank == 2)
+    {
+      cout << "offset beg row " << offset_rows_begin << endl;
+      cout << "offset end row " << offset_rows_end << endl;
+      cout << "offset beg col " << offset_cols_begin << endl;
+      cout << "offset end col " << offset_cols_end << endl;
+    }
+
 
     // datatypes for whole domain and tile without their borders - used for correct gatherv when rank 0 writes whole result into output file
     MPI_Datatype worker_tile_t;
@@ -1689,8 +1697,9 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       {
         cout << "Middle " << m_rank << endl;
 
-        if (m_rank == 0)
+        if (m_rank == 0 && out_size_cols != 1) // when rank 0 doesnt hold some values from middle column
         {
+          cout << "Rank 0 is not a part of middle column computing" << endl;
           middleColAvgTemp = 0.0f;
         }
         else
@@ -1708,7 +1717,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
           for (size_t i = 0; i < all_average_temp.size(); ++i)
           {
-            if (i == 0)
+            if (i == 0 && out_size_cols != 1) // when rank 0 doesnt hold some values from middle column
             {
               continue;
             }
