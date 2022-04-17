@@ -445,7 +445,7 @@ float* ParallelHeatSolver::TrimTileWithoutBorders(float* arr, int enlarged_tile_
         }
   }
 
-  print_array(result, enlarged_tile_size_rows - 4, enlarged_tile_size_cols - 4);
+  //print_array(result, enlarged_tile_size_rows - 4, enlarged_tile_size_cols - 4);
   return result;
 }
 
@@ -527,11 +527,13 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         out_size_cols = sqrt(domain_length) / local_tile_size_cols;
         out_size_rows = m_size / out_size_cols;
 
+        /*
         cout << "Out sizeh" << endl;
         cout << out_size_cols << endl;
         cout << out_size_rows << endl;
         cout << local_tile_size_cols << endl;
         cout << local_tile_size_rows << endl;
+        */
       }
 
       // 1 rank has more rows of domain
@@ -562,11 +564,13 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         out_size_cols = 1;
         out_size_rows = sqrt(domain_length) / local_tile_size_rows;
 
+        /*
         cout << "Out size" << endl;
         cout << out_size_cols << endl;
         cout << out_size_rows << endl;
         cout << local_tile_size_cols << endl;
         cout << local_tile_size_rows << endl;
+        */
       }
     }
 
@@ -611,8 +615,8 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       vector_res.append(", ");
     }
 
-    cout << "DOMAIN PARAMS ================" << endl;
-    cout << vector_res << endl;
+    //cout << "DOMAIN PARAMS ================" << endl;
+    //cout << vector_res << endl;
 
     }
 
@@ -653,7 +657,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
             //cout << x << ", " << y<< endl;
             //cout << "Process on index" << x*out_size_cols+y <<  endl;
             //int res =  x * sqrt(domain_length) * local_tile_size_cols + y * local_tile_size_rows;
-            if (x == 0 & y == 0)
+            if (x == 0 && y == 0)
             {
               res = 0;
             }
@@ -680,8 +684,8 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     int enlarged_tile_size_cols = local_tile_size_cols + 4;
     int enlarged_tile_size_rows = local_tile_size_rows + 4;
 
-    cout << "Enlarged sizes cols " << enlarged_tile_size_cols << endl;
-    cout << "Enlarged sizes rows " << enlarged_tile_size_rows << endl;
+    //cout << "Enlarged sizes cols " << enlarged_tile_size_cols << endl;
+    //cout << "Enlarged sizes rows " << enlarged_tile_size_rows << endl;
 
     // allocation for tile with borders for rank
     float *init_temp_local = (float*)malloc(enlarged_tile_size * sizeof(float));
@@ -700,6 +704,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     MPI_Scatterv(&(domain_map[0]), counts, displacements, resized_tile_t, &(domain_map_local[0]), local_tile_size_cols * local_tile_size_rows, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Scatterv(&(domain_params[0]), counts, displacements, resized_tile_t, &(domain_params_local[0]), local_tile_size_cols * local_tile_size_rows, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
+    /*
     for (int i = 0; i < m_num; i++) {
         MPI_Barrier(MPI_COMM_WORLD);
 
@@ -708,6 +713,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
             print_array(domain_params_local, local_tile_size_cols, local_tile_size_rows);
         }
     }
+    */
 
     vector<int> middle_ranks;
 
@@ -720,12 +726,12 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       int column_rank = i % out_size_cols;
       if (middle_col_id == column_rank || i == 0)
       {
-        cout << "Middle process rank is " << i << endl;
+        //cout << "Middle process rank is " << i << endl;
         middle_ranks.push_back(i);
       }
     }
 
-
+    /*
     string vector_res = "";
     cout << m_rank << endl;
     for (size_t i = 0; i < middle_ranks.size(); i++)
@@ -736,6 +742,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     }
 
     cout << vector_res << endl;
+    */
 
     MPI_Group WORLD_GROUP;
     MPI_Group MIDDLE_COLUMN_GROUP;
@@ -883,7 +890,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       }
     }
 
-    cout << "Upcoming requests for rank " << m_rank << ":   " << total_request_count << endl;
+    //cout << "Upcoming requests for rank " << m_rank << ":   " << total_request_count << endl;
 
     // SENDING NEIGHBOUR VALUES TO BORDERS OF TILE FOR INIT TEMP
     MPI_Request requests[total_request_count];
@@ -1063,7 +1070,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     MPI_Request requests_domain_map[total_request_count];
     num_requests = 0;
-    MPI_Barrier(MPI_COMM_WORLD);
 
     if (row_id != out_size_rows - 1)
     {
@@ -1210,7 +1216,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     MPI_Request requests_domain_params[total_request_count];
     num_requests = 0;
-    MPI_Barrier(MPI_COMM_WORLD);
 
     if (row_id != out_size_rows - 1)
     {
@@ -1348,6 +1353,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       }
     }
 
+    /*
     for (int i = 0; i < m_num; i++) {
         MPI_Barrier(MPI_COMM_WORLD);
 
@@ -1356,6 +1362,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
             print_array(&domain_params_local_with_borders_recieved_with_edges[0], enlarged_tile_size_cols, enlarged_tile_size_rows);
         }
     }
+    */
 
     /*
     if (m_rank == 6) {
@@ -1429,6 +1436,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       offset_rows_end += 1;
     }
 
+    /*
     if (m_rank == 2)
     {
       cout << "offset beg row " << offset_rows_begin << endl;
@@ -1436,6 +1444,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       cout << "offset beg col " << offset_cols_begin << endl;
       cout << "offset end col " << offset_cols_end << endl;
     }
+    */
 
 
     // datatypes for whole domain and tile without their borders - used for correct gatherv when rank 0 writes whole result into output file
@@ -1688,16 +1697,16 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       // compute middle column temperature if rank is in communicator and holds middle column of domain
       if (count(middle_ranks.begin(), middle_ranks.end(), m_rank))
       {
-        cout << "Middle " << m_rank << endl;
+        //cout << "Middle " << m_rank << endl;
 
         if (m_rank == 0 && out_size_cols != 1) // when rank 0 doesnt hold some values from middle column
         {
-          cout << "Rank 0 is not a part of middle column computing" << endl;
+          //cout << "Rank 0 is not a part of middle column computing" << endl;
           middleColAvgTemp = 0.0f;
         }
         else
         {
-          middleColAvgTemp = ComputeMiddleColAvgTemp(workTempArrays[0], enlarged_tile_size_rows, enlarged_tile_size_cols, out_size_rows, out_size_cols, middle_item_tile_col_id, m_rank);
+          middleColAvgTemp = ComputeMiddleColAvgTemp(workTempArrays[0], enlarged_tile_size_rows, enlarged_tile_size_cols, middle_item_tile_col_id);
         }
 
         vector<float> all_average_temp(out_size_rows + 1);
@@ -1730,23 +1739,23 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       if (!m_simulationProperties.GetOutputFileName().empty())
       {
         // rank 0 gathers whole domain temp from all ranks (their tiles without borders) for sequentially saving into file
-        MPI_Gatherv(&workTempArrays[0][0], 1, worker_tile_t, &whole_domain_temp_snapshot[0], counts, displacements, resized_farmer_matrix_t, 0, MPI_COMM_WORLD);
-
+        //MPI_Gatherv(&workTempArrays[0][0], 1, worker_tile_t, &whole_domain_temp_snapshot[0], counts, displacements, resized_farmer_matrix_t, 0, MPI_COMM_WORLD);
+        /*
         if (m_rank == 0) {
-          cout << "Printing snapshot" << endl;
-          print_array(whole_domain_temp_snapshot, sqrt(domain_length), sqrt(domain_length));
-        }
+          //cout << "Printing snapshot" << endl;
+          //print_array(whole_domain_temp_snapshot, sqrt(domain_length), sqrt(domain_length));
+        }*/
             if (!m_simulationProperties.IsUseParallelIO() && ((iter % m_simulationProperties.GetDiskWriteIntensity()) == 0))
             {
               // sequential writing by rank 0 - gathers all ranks tiles without borders to one array which is inserted into output file
-              //MPI_Gatherv(&workTempArrays[0][0], 1, worker_tile_t, &whole_domain_temp_snapshot[0], counts, displacements, resized_farmer_matrix_t, 0, MPI_COMM_WORLD);
+              MPI_Gatherv(&workTempArrays[0][0], 1, worker_tile_t, &whole_domain_temp_snapshot[0], counts, displacements, resized_farmer_matrix_t, 0, MPI_COMM_WORLD);
               if (m_rank == 0)
               {
                 StoreDataIntoFile(m_fileHandle, iter, &whole_domain_temp_snapshot[0]);
               }
             }
             // when parallel writing is enabled
-            else if (m_simulationProperties.IsUseParallelIO())
+            else if (m_simulationProperties.IsUseParallelIO() && ((iter % m_simulationProperties.GetDiskWriteIntensity()) == 0))
             {
               // create new separate file for result temperature of this iteration
               string input_file_name = m_simulationProperties.GetOutputFileName("par");
@@ -1768,7 +1777,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
               float *tile_snapshot;
               float tile_result[local_tile_size];
               tile_snapshot = TrimTileWithoutBorders(&workTempArrays[0][0], enlarged_tile_size_rows, enlarged_tile_size_cols, tile_result);
-              print_array(tile_snapshot, local_tile_size_rows, local_tile_size_cols);
+              //print_array(tile_snapshot, local_tile_size_rows, local_tile_size_cols);
 
               string dataset_name = "";
               dataset_name.append("iteration_");
@@ -1794,12 +1803,12 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
       swap(workTempArrays[0], workTempArrays[1]);
 
-      if (m_rank == 0)
+      if (m_rank == 0 && ShouldPrintProgress(iter))
       {
         PrintProgressReport(iter, final_iteration_temp);
       }
 
-      if (!m_simulationProperties.GetOutputFileName().empty() && m_simulationProperties.IsUseParallelIO())
+      if (!m_simulationProperties.GetOutputFileName().empty() && m_simulationProperties.IsUseParallelIO() && ((iter % m_simulationProperties.GetDiskWriteIntensity()) == 0))
       {
         H5Dclose(dataset_iteration);
       }
@@ -1835,14 +1844,14 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 }
 
 // computing of average temparature of middle column in tile
-float ParallelHeatSolver::ComputeMiddleColAvgTemp(const float *data, int enlarged_tile_size_rows, int enlarged_tile_size_cols, int out_size_rows, int out_size_cols, int middle_item_tile_col_id, int m_rank) const
+float ParallelHeatSolver::ComputeMiddleColAvgTemp(const float *data, int enlarged_tile_size_rows, int enlarged_tile_size_cols, int middle_item_tile_col_id) const
 {
     float middleColAvgTemp = 0.0f;
     float result = 0.0f;
 
     // index of column which will have influence on middle temperature (index computed for tile + 2 because of enlarged borders)
     int middle_column_tile_id = 2 + middle_item_tile_col_id;
-    cout << "Middle column tile id " << middle_column_tile_id <<  endl;
+    //cout << "Middle column tile id " << middle_column_tile_id <<  endl;
     //cout << "Enlarge rows " << enlarged_tile_size_rows << endl;
     //cout << "Enlarge cols " << enlarged_tile_size_cols << endl;
 
@@ -1855,19 +1864,21 @@ float ParallelHeatSolver::ComputeMiddleColAvgTemp(const float *data, int enlarge
             int row_id = index_1D / enlarged_tile_size_cols;
             int col_id = index_1D % enlarged_tile_size_cols;
 
+            /*
             if (m_rank == 2)
             {
                 float value = data[index_1D];
                 //cout << "TEMP " << value << endl;
             }
+            */
 
             // ignore border values of enlarged tile
             if ((middle_column_tile_id == col_id && row_id != 0) && (middle_column_tile_id == col_id && row_id != 1) && (middle_column_tile_id == col_id && row_id != enlarged_tile_size_rows - 2) && (middle_column_tile_id == col_id && row_id != enlarged_tile_size_rows - 1))
             {
-                  cout << "IMDEX" << index_1D << endl;
+                  //cout << "IMDEX" << index_1D << endl;
                   //cout << data[index_1D] << endl;
                   float value = data[index_1D];
-                  cout << "TEMP OF MIDDLE COL OF "  << m_rank << ": " <<  value << endl;
+                  //cout << "TEMP OF MIDDLE COL OF "  << m_rank << ": " <<  value << endl;
                   middleColAvgTemp += value;
             }
         }
