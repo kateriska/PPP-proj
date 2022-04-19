@@ -797,7 +797,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     int upper_right_rank = m_rank - out_size_cols + 1;
 
     /*
-      SENDING NEIGHBOUR VALUES TO BORDERS OF TILE FOR EACH INIT TEMP, DOMAIN PARAMS AND DOMAIN MAP
+      SENDING NEIGHBOUR VALUES TO BORDERS OF TILE FOR EACH INIT TEMP, DOMAIN PARAMS AND DOMAIN MAP (process for sending values to tile borders is same for all 3 arrays: init temp, domain map and domain params)
       FIRSTLY ROWS AND COLUMNS FROM NEIGHBOURS ARE SENT AND INSERTED INTO BORDERS
       THEN UPPER LEFT, UPPER RIGHT, DOWN LEFT AND DOWN RIGHT CORNERS ARE SEND
 
@@ -893,6 +893,8 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     //cout << "Upcoming requests for rank " << m_rank << ":   " << total_request_count << endl;
 
     // SENDING NEIGHBOUR VALUES TO BORDERS OF TILE FOR INIT TEMP
+
+    // sending rows and columns from upper, down, left and right neighbors
     MPI_Request requests[total_request_count];
     int num_requests = 0;
 
@@ -934,6 +936,96 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     MPI_Waitall(total_request_count, requests, NULL);
 
+    /*
+    specially for 1D decomposition when m_size >= sqrt(domain_length) (tile is one row (y dimension is 1)):
+    enlarged tile with their borders (domain params example):
+    // this is row overlapping my neighbor's upper neighbor rank (the rank is not same of these two upper borders)  0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
+    // this is row overlapping my upper neighbor rank (as in 2D)                                                    0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
+    // this is my original tile with my values                                                                      0.000000 0.000000 0.000051 0.000051 0.002136 0.002136 0.002136 0.002136 0.002916 0.002916 0.002916 0.002916 0.002136 0.002136 0.002136 0.002136 0.000051 0.000051 0.000000 0.000000
+    // this is row overlapping my upper neighbor rank (as in 2D)                                                    0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
+    // this is row overlapping my neighbor's down neighbor rank (the rank is not same of these two down borders)    0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
+
+    during this process ranks recieve correct row from neighbor's upper neighbor rank or neighbor's down neighbor rank and save them to first or last row of their enlarged tile,
+    two borders from upper and down neighbor ranks were already send before and are simmilar to 2D
+
+    e.g. for domain 16 x 16, 1D decomposition for 16 ranks (each rank has one row of domain), domain params, situation for rank 4:
+    already sended rows from neighbors ranks 3 and 5:
+    RANK: 4
+    0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
+    0.000000 0.000000 0.000051 0.000051 0.000051 0.000051 0.002136 0.002136 0.002916 0.002916 0.002916 0.002916 0.002136 0.002136 0.000051 0.000051 0.000051 0.000051 0.000000 0.000000
+    0.000000 0.000000 0.000051 0.000051 0.002136 0.002136 0.002136 0.002136 0.002916 0.002916 0.002916 0.002916 0.002136 0.002136 0.002136 0.002136 0.000051 0.000051 0.000000 0.000000
+    0.000000 0.000000 0.000051 0.000051 0.000051 0.000051 0.000051 0.000051 0.002916 0.002916 0.002916 0.002916 0.000051 0.000051 0.000051 0.000051 0.000051 0.000051 0.000000 0.000000
+    0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
+
+    now we send rows from neighbor's neighbors rank 2 and 6:
+    RANK: 4
+    0.000000 0.000000 0.000051 0.000051 0.000051 0.000051 0.002916 0.002916 0.002916 0.002916 0.002916 0.002916 0.002916 0.002916 0.000051 0.000051 0.000051 0.000051 0.000000 0.000000
+    0.000000 0.000000 0.000051 0.000051 0.000051 0.000051 0.002136 0.002136 0.002916 0.002916 0.002916 0.002916 0.002136 0.002136 0.000051 0.000051 0.000051 0.000051 0.000000 0.000000
+    0.000000 0.000000 0.000051 0.000051 0.002136 0.002136 0.002136 0.002136 0.002916 0.002916 0.002916 0.002916 0.002136 0.002136 0.002136 0.002136 0.000051 0.000051 0.000000 0.000000
+    0.000000 0.000000 0.000051 0.000051 0.000051 0.000051 0.000051 0.000051 0.002916 0.002916 0.002916 0.002916 0.000051 0.000051 0.000051 0.000051 0.000051 0.000051 0.000000 0.000000
+    0.000000 0.000000 0.000051 0.000051 0.002136 0.002136 0.002136 0.002136 0.002916 0.002916 0.002916 0.002916 0.002136 0.002136 0.002136 0.002136 0.000051 0.000051 0.000000 0.000000
+    */
+    int rows_second_neighbor_request_count = 0;
+    // requests for Irecv
+    if (row_id == 0 || row_id == out_size_rows - 1 || row_id - 1 == 0 || row_id + 1 == out_size_rows - 1)
+    {
+      rows_second_neighbor_request_count += 1;
+    }
+    else
+    {
+      rows_second_neighbor_request_count += 2;
+    }
+    // requests for Isend
+    if (row_id == 0 || row_id == out_size_rows - 1 || row_id - 1 == 0 || row_id + 1 == out_size_rows - 1)
+    {
+      rows_second_neighbor_request_count += 1;
+    }
+    else
+    {
+      rows_second_neighbor_request_count += 2;
+    }
+
+    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && m_size >= sqrt(domain_length))
+    {
+      num_requests = 0;
+      MPI_Request requests_init_temp_recieved_1D[rows_second_neighbor_request_count];
+
+      vector<float> init_temp_local_with_borders_recieved_1D;
+
+      for (size_t i = 0; i < init_temp_local_with_borders_recieved.size(); i++)
+      {
+        float value = init_temp_local_with_borders_recieved.at(i);
+        init_temp_local_with_borders_recieved_1D.push_back(value);
+      }
+
+      if (row_id != out_size_rows - 1 && row_id + 1 != out_size_rows - 1)
+      {
+          MPI_Irecv(&init_temp_local_with_borders_recieved_1D[enlarged_tile_size_cols * (enlarged_tile_size_rows - 1)], 1, tile_row_t, down_rank + out_size_cols, FROM_DOWN_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_init_temp_recieved_1D[num_requests++]);
+      }
+      if (row_id != 0 && row_id - 1 != 0)
+      {
+          MPI_Irecv(&init_temp_local_with_borders_recieved_1D[enlarged_tile_size_cols * 0], 1, tile_row_t, upper_rank - out_size_cols, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_init_temp_recieved_1D[num_requests++]);
+      }
+      if (row_id != 0 && row_id - 1 != 0)
+      {
+          MPI_Isend(&init_temp_local_with_borders_recieved[enlarged_tile_size_cols * 2], 1, tile_row_t, upper_rank - out_size_cols, FROM_DOWN_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_init_temp_recieved_1D[num_requests++]);
+      }
+      if (row_id != out_size_rows - 1 && row_id + 1 != out_size_rows - 1)
+      {
+          MPI_Isend(&init_temp_local_with_borders_recieved[enlarged_tile_size_cols * 2], 1, tile_row_t, down_rank + out_size_cols, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_init_temp_recieved_1D[num_requests++]);
+      }
+
+      MPI_Waitall(rows_second_neighbor_request_count, requests_init_temp_recieved_1D, NULL);
+
+      init_temp_local_with_borders_recieved.clear();
+      for (size_t i = 0; i < init_temp_local_with_borders_recieved_1D.size(); i++)
+      {
+        float value = init_temp_local_with_borders_recieved_1D.at(i);
+        init_temp_local_with_borders_recieved.push_back(value);
+      }
+    }
+
+    // sending upper left, upper right, down left and down right corners from correct neighbors:
     MPI_Request requests_init_temp_recieved[edges_request_count];
     num_requests = 0;
 
@@ -987,78 +1079,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     MPI_Waitall(edges_request_count, requests_init_temp_recieved, NULL);
 
-    /*
-    specially for 1D decomposition when m_size >= sqrt(domain_length) (tile is one row (y dimension is 1)):
-    enlarged tile with their borders (domain params example):
-    // this is row overlapping my neighbor's upper neighbor rank (the rank is not same of these two upper borders)  0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
-    // this is row overlapping my upper neighbor rank (as in 2D)                                                    0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
-    // this is my original tile with my values                                                                      0.000000 0.000000 0.000051 0.000051 0.002136 0.002136 0.002136 0.002136 0.002916 0.002916 0.002916 0.002916 0.002136 0.002136 0.002136 0.002136 0.000051 0.000051 0.000000 0.000000
-    // this is row overlapping my upper neighbor rank (as in 2D)                                                    0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
-    // this is row overlapping my neighbor's down neighbor rank (the rank is not same of these two down borders)    0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
-
-    during this process ranks recieve correct row from neighbor's upper neighbor rank or neighbor's down neighbor rank and save them to first or last row of their enlarged tile,
-    two borders from upper and down neighbor ranks were already send before and are simmilar to 2D
-    */
-    int rows_second_neighbor_request_count = 0;
-    // requests for Irecv
-    if (row_id == 0 || row_id == out_size_rows - 1 || row_id - 1 == 0 || row_id + 1 == out_size_rows - 1)
-    {
-      rows_second_neighbor_request_count += 1;
-    }
-    else
-    {
-      rows_second_neighbor_request_count += 2;
-    }
-    // requests for Isend
-    if (row_id == 0 || row_id == out_size_rows - 1 || row_id - 1 == 0 || row_id + 1 == out_size_rows - 1)
-    {
-      rows_second_neighbor_request_count += 1;
-    }
-    else
-    {
-      rows_second_neighbor_request_count += 2;
-    }
-
-    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && m_size >= sqrt(domain_length))
-    {
-      num_requests = 0;
-      MPI_Request requests_init_temp_recieved_1D[rows_second_neighbor_request_count];
-
-      vector<float> init_temp_local_with_borders_recieved_with_edges_1D;
-
-      for (size_t i = 0; i < init_temp_local_with_borders_recieved_with_edges.size(); i++)
-      {
-        float value = init_temp_local_with_borders_recieved_with_edges.at(i);
-        init_temp_local_with_borders_recieved_with_edges_1D.push_back(value);
-      }
-
-      if (row_id != out_size_rows - 1 && row_id + 1 != out_size_rows - 1)
-      {
-          MPI_Irecv(&init_temp_local_with_borders_recieved_with_edges_1D[enlarged_tile_size_cols * (enlarged_tile_size_rows - 1)], 1, tile_row_t, down_rank + out_size_cols, FROM_DOWN_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_init_temp_recieved_1D[num_requests++]);
-      }
-      if (row_id != 0 && row_id - 1 != 0)
-      {
-          MPI_Irecv(&init_temp_local_with_borders_recieved_with_edges_1D[enlarged_tile_size_cols * 0], 1, tile_row_t, upper_rank - out_size_cols, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_init_temp_recieved_1D[num_requests++]);
-      }
-      if (row_id != 0 && row_id - 1 != 0)
-      {
-          MPI_Isend(&init_temp_local_with_borders_recieved_with_edges[enlarged_tile_size_cols * 2], 1, tile_row_t, upper_rank - out_size_cols, FROM_DOWN_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_init_temp_recieved_1D[num_requests++]);
-      }
-      if (row_id != out_size_rows - 1 && row_id + 1 != out_size_rows - 1)
-      {
-          MPI_Isend(&init_temp_local_with_borders_recieved_with_edges[enlarged_tile_size_cols * 2], 1, tile_row_t, down_rank + out_size_cols, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_init_temp_recieved_1D[num_requests++]);
-      }
-
-      MPI_Waitall(rows_second_neighbor_request_count, requests_init_temp_recieved_1D, NULL);
-
-      init_temp_local_with_borders_recieved_with_edges.clear();
-      for (size_t i = 0; i < init_temp_local_with_borders_recieved_with_edges_1D.size(); i++)
-      {
-        float value = init_temp_local_with_borders_recieved_with_edges_1D.at(i);
-        init_temp_local_with_borders_recieved_with_edges.push_back(value);
-      }
-    }
-
 
     // SENDING NEIGHBOUR VALUES TO BORDERS OF TILE FOR DOMAIN MAP
     vector<int> domain_map_local_with_borders_recieved;
@@ -1109,6 +1129,46 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     }
 
     MPI_Waitall(total_request_count, requests_domain_map, NULL);
+
+    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && m_size >= sqrt(domain_length))
+    {
+      num_requests = 0;
+      MPI_Request requests_domain_map_recieved_1D[rows_second_neighbor_request_count];
+
+      vector<int> domain_map_local_with_borders_recieved_1D;
+
+      for (size_t i = 0; i < domain_map_local_with_borders_recieved.size(); i++)
+      {
+        int value = domain_map_local_with_borders_recieved.at(i);
+        domain_map_local_with_borders_recieved_1D.push_back(value);
+      }
+
+      if (row_id != out_size_rows - 1 && row_id + 1 != out_size_rows - 1)
+      {
+          MPI_Irecv(&domain_map_local_with_borders_recieved_1D[enlarged_tile_size_cols * (enlarged_tile_size_rows - 1)], 1, tile_row_t, down_rank + out_size_cols, FROM_DOWN_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_map_recieved_1D[num_requests++]);
+      }
+      if (row_id != 0 && row_id - 1 != 0)
+      {
+          MPI_Irecv(&domain_map_local_with_borders_recieved_1D[enlarged_tile_size_cols * 0], 1, tile_row_t, upper_rank - out_size_cols, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_map_recieved_1D[num_requests++]);
+      }
+      if (row_id != 0 && row_id - 1 != 0)
+      {
+          MPI_Isend(&domain_map_local_with_borders_recieved[enlarged_tile_size_cols * 2], 1, tile_row_t, upper_rank - out_size_cols, FROM_DOWN_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_map_recieved_1D[num_requests++]);
+      }
+      if (row_id != out_size_rows - 1 && row_id + 1 != out_size_rows - 1)
+      {
+          MPI_Isend(&domain_map_local_with_borders_recieved[enlarged_tile_size_cols * 2], 1, tile_row_t, down_rank + out_size_cols, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_map_recieved_1D[num_requests++]);
+      }
+
+      MPI_Waitall(rows_second_neighbor_request_count, requests_domain_map_recieved_1D, NULL);
+
+      domain_map_local_with_borders_recieved.clear();
+      for (size_t i = 0; i < domain_map_local_with_borders_recieved_1D.size(); i++)
+      {
+        int value = domain_map_local_with_borders_recieved_1D.at(i);
+        domain_map_local_with_borders_recieved.push_back(value);
+      }
+    }
 
     vector<int> domain_map_local_with_borders_recieved_with_edges;
 
@@ -1166,46 +1226,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     MPI_Waitall(edges_request_count, requests_domain_map_recieved, NULL);
 
-    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && m_size >= sqrt(domain_length))
-    {
-      num_requests = 0;
-      MPI_Request requests_domain_map_recieved_1D[rows_second_neighbor_request_count];
-
-      vector<int> domain_map_local_with_borders_recieved_with_edges_1D;
-
-      for (size_t i = 0; i < domain_map_local_with_borders_recieved_with_edges.size(); i++)
-      {
-        int value = domain_map_local_with_borders_recieved_with_edges.at(i);
-        domain_map_local_with_borders_recieved_with_edges_1D.push_back(value);
-      }
-
-      if (row_id != out_size_rows - 1 && row_id + 1 != out_size_rows - 1)
-      {
-          MPI_Irecv(&domain_map_local_with_borders_recieved_with_edges_1D[enlarged_tile_size_cols * (enlarged_tile_size_rows - 1)], 1, tile_row_t, down_rank + out_size_cols, FROM_DOWN_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_map_recieved_1D[num_requests++]);
-      }
-      if (row_id != 0 && row_id - 1 != 0)
-      {
-          MPI_Irecv(&domain_map_local_with_borders_recieved_with_edges_1D[enlarged_tile_size_cols * 0], 1, tile_row_t, upper_rank - out_size_cols, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_map_recieved_1D[num_requests++]);
-      }
-      if (row_id != 0 && row_id - 1 != 0)
-      {
-          MPI_Isend(&domain_map_local_with_borders_recieved_with_edges[enlarged_tile_size_cols * 2], 1, tile_row_t, upper_rank - out_size_cols, FROM_DOWN_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_map_recieved_1D[num_requests++]);
-      }
-      if (row_id != out_size_rows - 1 && row_id + 1 != out_size_rows - 1)
-      {
-          MPI_Isend(&domain_map_local_with_borders_recieved_with_edges[enlarged_tile_size_cols * 2], 1, tile_row_t, down_rank + out_size_cols, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_map_recieved_1D[num_requests++]);
-      }
-
-      MPI_Waitall(rows_second_neighbor_request_count, requests_domain_map_recieved_1D, NULL);
-
-      domain_map_local_with_borders_recieved_with_edges.clear();
-      for (size_t i = 0; i < domain_map_local_with_borders_recieved_with_edges_1D.size(); i++)
-      {
-        int value = domain_map_local_with_borders_recieved_with_edges_1D.at(i);
-        domain_map_local_with_borders_recieved_with_edges.push_back(value);
-      }
-    }
-
     // SENDING NEIGHBOUR VALUES TO BORDERS OF TILE FOR DOMAIN PARAMS
     vector<float> domain_params_local_with_borders_recieved;
 
@@ -1257,6 +1277,46 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     }
 
     MPI_Waitall(total_request_count, requests_domain_params, NULL);
+
+    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && m_size >= sqrt(domain_length))
+    {
+      num_requests = 0;
+      MPI_Request requests_domain_params_recieved_1D[rows_second_neighbor_request_count];
+
+      vector<float> domain_params_local_with_borders_recieved_1D;
+
+      for (size_t i = 0; i < domain_params_local_with_borders_recieved.size(); i++)
+      {
+        float value = domain_params_local_with_borders_recieved.at(i);
+        domain_params_local_with_borders_recieved_1D.push_back(value);
+      }
+
+      if (row_id != out_size_rows - 1 && row_id + 1 != out_size_rows - 1)
+      {
+          MPI_Irecv(&domain_params_local_with_borders_recieved_1D[enlarged_tile_size_cols * (enlarged_tile_size_rows - 1)], 1, tile_row_t, down_rank + out_size_cols, FROM_DOWN_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_params_recieved_1D[num_requests++]);
+      }
+      if (row_id != 0 && row_id - 1 != 0)
+      {
+          MPI_Irecv(&domain_params_local_with_borders_recieved_1D[enlarged_tile_size_cols * 0], 1, tile_row_t, upper_rank - out_size_cols, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_params_recieved_1D[num_requests++]);
+      }
+      if (row_id != 0 && row_id - 1 != 0)
+      {
+          MPI_Isend(&domain_params_local_with_borders_recieved[enlarged_tile_size_cols * 2], 1, tile_row_t, upper_rank - out_size_cols, FROM_DOWN_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_params_recieved_1D[num_requests++]);
+      }
+      if (row_id != out_size_rows - 1 && row_id + 1 != out_size_rows - 1)
+      {
+          MPI_Isend(&domain_params_local_with_borders_recieved[enlarged_tile_size_cols * 2], 1, tile_row_t, down_rank + out_size_cols, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_params_recieved_1D[num_requests++]);
+      }
+
+      MPI_Waitall(rows_second_neighbor_request_count, requests_domain_params_recieved_1D, NULL);
+
+      domain_params_local_with_borders_recieved.clear();
+      for (size_t i = 0; i < domain_params_local_with_borders_recieved_1D.size(); i++)
+      {
+        float value = domain_params_local_with_borders_recieved_1D.at(i);
+        domain_params_local_with_borders_recieved.push_back(value);
+      }
+    }
 
     vector<float> domain_params_local_with_borders_recieved_with_edges;
 
@@ -1313,47 +1373,8 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     MPI_Waitall(edges_request_count, requests_domain_params, NULL);
 
-    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && m_size >= sqrt(domain_length))
-    {
-      num_requests = 0;
-      MPI_Request requests_domain_params_recieved_1D[rows_second_neighbor_request_count];
-
-      vector<float> domain_params_local_with_borders_recieved_with_edges_1D;
-
-      for (size_t i = 0; i < domain_params_local_with_borders_recieved_with_edges.size(); i++)
-      {
-        float value = domain_params_local_with_borders_recieved_with_edges.at(i);
-        domain_params_local_with_borders_recieved_with_edges_1D.push_back(value);
-      }
-
-      if (row_id != out_size_rows - 1 && row_id + 1 != out_size_rows - 1)
-      {
-          MPI_Irecv(&domain_params_local_with_borders_recieved_with_edges_1D[enlarged_tile_size_cols * (enlarged_tile_size_rows - 1)], 1, tile_row_t, down_rank + out_size_cols, FROM_DOWN_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_params_recieved_1D[num_requests++]);
-      }
-      if (row_id != 0 && row_id - 1 != 0)
-      {
-          MPI_Irecv(&domain_params_local_with_borders_recieved_with_edges_1D[enlarged_tile_size_cols * 0], 1, tile_row_t, upper_rank - out_size_cols, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_params_recieved_1D[num_requests++]);
-      }
-      if (row_id != 0 && row_id - 1 != 0)
-      {
-          MPI_Isend(&domain_params_local_with_borders_recieved_with_edges[enlarged_tile_size_cols * 2], 1, tile_row_t, upper_rank - out_size_cols, FROM_DOWN_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_params_recieved_1D[num_requests++]);
-      }
-      if (row_id != out_size_rows - 1 && row_id + 1 != out_size_rows - 1)
-      {
-          MPI_Isend(&domain_params_local_with_borders_recieved_with_edges[enlarged_tile_size_cols * 2], 1, tile_row_t, down_rank + out_size_cols, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_params_recieved_1D[num_requests++]);
-      }
-
-      MPI_Waitall(rows_second_neighbor_request_count, requests_domain_params_recieved_1D, NULL);
-
-      domain_params_local_with_borders_recieved_with_edges.clear();
-      for (size_t i = 0; i < domain_params_local_with_borders_recieved_with_edges_1D.size(); i++)
-      {
-        float value = domain_params_local_with_borders_recieved_with_edges_1D.at(i);
-        domain_params_local_with_borders_recieved_with_edges.push_back(value);
-      }
-    }
-
     /*
+    // debug part of code for printing tile for each rank and see whether each rank has correct tile values
     for (int i = 0; i < m_num; i++) {
         MPI_Barrier(MPI_COMM_WORLD);
 
@@ -1363,6 +1384,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         }
     }
     */
+
 
     /*
     if (m_rank == 6) {
@@ -1828,6 +1850,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       H5Dclose(dataset);
     }
 
+    // temperatures from all tiles are gathered in rank 0 and returned as outResult
     MPI_Gatherv(&workTempArrays[0][0], 1, worker_tile_t, &outResult[0], counts, displacements, resized_farmer_matrix_t, 0, MPI_COMM_WORLD);
 
     // cleaning
@@ -1841,6 +1864,14 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     MPI_Type_free(&worker_tile_t);
     MPI_Type_free(&farmer_matrix_t);
     MPI_Type_free(&resized_farmer_matrix_t);
+
+    if (count(middle_ranks.begin(), middle_ranks.end(), m_rank))
+    {
+      MPI_Comm_free(&MPI_COMM_MIDDLE_COLUMN);
+    }
+
+    MPI_Group_free(&WORLD_GROUP);
+    MPI_Group_free(&MIDDLE_COLUMN_GROUP);
 }
 
 // computing of average temparature of middle column in tile
