@@ -14,14 +14,14 @@ declare -a PROCESSES=(1 2 4 8 16 32)
 
 STDOUT_FILE="run_full_hybrid_1d_out.csv"
 STDERR_FILE="run_full_hybrid_1d_err.txt"
-BINARY_PATH="../build/ppp_proj01"
+BINARY_PATH="/home/training/dd-21-22-303/PPP-barbora/build/ppp_proj01"
 
 mkdir -p /scratch/project/dd-21-22/$USER/$PBS_JOBID
 OUT_FILE_PATH=/scratch/project/dd-21-22/$USER/$PBS_JOBID
 
 # Doplnte vhodne nastavenie Lustre file system #
 ################################################
-
+lfs setstripe -S 1M -c 16 /scratch/project/dd-21-22/$USER
 ################################################
 
 DISK_WRITE_INTENSITY=50
@@ -31,7 +31,7 @@ export KMP_AFFINITY=compact
 for procs in ${PROCESSES[*]}; do
     for size in ${SIZES[*]}; do
         H=""
-        
+
         if [ "$procs" -eq 1 ]; then
             n_iters=`expr $((2000000/$size))`
             export OMP_NUM_THREADS=1
@@ -46,15 +46,15 @@ for procs in ${PROCESSES[*]}; do
             modeP2P=1
             modeRMA=2
         fi
-        
-        mpirun -np $procs $BINARY_PATH -b $H -n $n_iters -m $modeP2P -w $DISK_WRITE_INTENSITY -i input_data_$size.h5 -t $OMP_NUM_THREADS                                                    >> $STDOUT_FILE 2>> $STDERR_FILE
-        mpirun -np $procs $BINARY_PATH -b    -n $n_iters -m $modeP2P -w $DISK_WRITE_INTENSITY -i input_data_$size.h5 -t $OMP_NUM_THREADS -o $OUT_FILE_PATH/${size}x${size}_out_hybrid_1d.h5 >> $STDOUT_FILE 2>> $STDERR_FILE
-        mpirun -np $procs $BINARY_PATH -b -p -n $n_iters -m $modeP2P -w $DISK_WRITE_INTENSITY -i input_data_$size.h5 -t $OMP_NUM_THREADS -o $OUT_FILE_PATH/${size}x${size}_out_hybrid_1d.h5 >> $STDOUT_FILE 2>> $STDERR_FILE
 
-        mpirun -np $procs $BINARY_PATH -b    -n $n_iters -m $modeRMA -w $DISK_WRITE_INTENSITY -i input_data_$size.h5 -t $OMP_NUM_THREADS                                                    >> $STDOUT_FILE 2>> $STDERR_FILE
-        mpirun -np $procs $BINARY_PATH -b    -n $n_iters -m $modeRMA -w $DISK_WRITE_INTENSITY -i input_data_$size.h5 -t $OMP_NUM_THREADS -o $OUT_FILE_PATH/${size}x${size}_out_hybrid_1d.h5 >> $STDOUT_FILE 2>> $STDERR_FILE
-        mpirun -np $procs $BINARY_PATH -b -p -n $n_iters -m $modeRMA -w $DISK_WRITE_INTENSITY -i input_data_$size.h5 -t $OMP_NUM_THREADS -o $OUT_FILE_PATH/${size}x${size}_out_hybrid_1d.h5 >> $STDOUT_FILE 2>> $STDERR_FILE
-        
+        mpirun -np $procs $BINARY_PATH -b $H -n $n_iters -m $modeP2P -w $DISK_WRITE_INTENSITY -i /home/training/dd-21-22-303/PPP-barbora/scripts/input_data_$size.h5 -t $OMP_NUM_THREADS                                                    >> $STDOUT_FILE 2>> $STDERR_FILE
+        mpirun -np $procs $BINARY_PATH -b    -n $n_iters -m $modeP2P -w $DISK_WRITE_INTENSITY -i /home/training/dd-21-22-303/PPP-barbora/scripts/input_data_$size.h5 -t $OMP_NUM_THREADS -o $OUT_FILE_PATH/${size}x${size}_out_hybrid_1d.h5 >> $STDOUT_FILE 2>> $STDERR_FILE
+        mpirun -np $procs $BINARY_PATH -b -p -n $n_iters -m $modeP2P -w $DISK_WRITE_INTENSITY -i /home/training/dd-21-22-303/PPP-barbora/scripts/input_data_$size.h5 -t $OMP_NUM_THREADS -o $OUT_FILE_PATH/${size}x${size}_out_hybrid_1d.h5 >> $STDOUT_FILE 2>> $STDERR_FILE
+
+        mpirun -np $procs $BINARY_PATH -b    -n $n_iters -m $modeRMA -w $DISK_WRITE_INTENSITY -i /home/training/dd-21-22-303/PPP-barbora/scripts/input_data_$size.h5 -t $OMP_NUM_THREADS                                                    >> $STDOUT_FILE 2>> $STDERR_FILE
+        mpirun -np $procs $BINARY_PATH -b    -n $n_iters -m $modeRMA -w $DISK_WRITE_INTENSITY -i /home/training/dd-21-22-303/PPP-barbora/scripts/input_data_$size.h5 -t $OMP_NUM_THREADS -o $OUT_FILE_PATH/${size}x${size}_out_hybrid_1d.h5 >> $STDOUT_FILE 2>> $STDERR_FILE
+        mpirun -np $procs $BINARY_PATH -b -p -n $n_iters -m $modeRMA -w $DISK_WRITE_INTENSITY -i /home/training/dd-21-22-303/PPP-barbora/scripts/input_data_$size.h5 -t $OMP_NUM_THREADS -o $OUT_FILE_PATH/${size}x${size}_out_hybrid_1d.h5 >> $STDOUT_FILE 2>> $STDERR_FILE
+
         rm -f $OUT_FILE_PATH/${size}x${size}_out_hybrid_1d.h5
     done
 done

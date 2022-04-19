@@ -37,8 +37,7 @@ using namespace std;
 ParallelHeatSolver::ParallelHeatSolver(SimulationProperties &simulationProps,
                                        MaterialProperties &materialProps)
     : BaseHeatSolver (simulationProps, materialProps),
-     m_fileHandle(H5I_INVALID_HID, static_cast<void (*)(hid_t )>(nullptr)),
-     m_fileHandle_iteration(H5I_INVALID_HID, static_cast<void (*)(hid_t )>(nullptr))
+     m_fileHandle(H5I_INVALID_HID, static_cast<void (*)(hid_t )>(nullptr))
 {
     MPI_Comm_size(MPI_COMM_WORLD, &m_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &m_rank);
@@ -934,7 +933,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         MPI_Isend(&init_temp_local_with_borders[enlarged_tile_size_cols - 1 - 3], 1, tile_col_t, right_rank, FROM_LEFT_RANK_TAG_COL, MPI_COMM_WORLD, &requests[num_requests++]);
     }
 
-    MPI_Waitall(total_request_count, requests, NULL);
+    MPI_Waitall(total_request_count, requests, MPI_STATUSES_IGNORE);
 
     /*
     specially for 1D decomposition when m_size >= sqrt(domain_length) (tile is one row (y dimension is 1)):
@@ -1015,7 +1014,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
           MPI_Isend(&init_temp_local_with_borders_recieved[enlarged_tile_size_cols * 2], 1, tile_row_t, down_rank + out_size_cols, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_init_temp_recieved_1D[num_requests++]);
       }
 
-      MPI_Waitall(rows_second_neighbor_request_count, requests_init_temp_recieved_1D, NULL);
+      MPI_Waitall(rows_second_neighbor_request_count, requests_init_temp_recieved_1D, MPI_STATUSES_IGNORE);
 
       init_temp_local_with_borders_recieved.clear();
       for (size_t i = 0; i < init_temp_local_with_borders_recieved_1D.size(); i++)
@@ -1077,7 +1076,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       MPI_Isend(&init_temp_local_with_borders_recieved[index_1D], 1, enlarge_tile_part_t, down_left_rank, FROM_UPPER_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_init_temp_recieved[num_requests++]);
     }
 
-    MPI_Waitall(edges_request_count, requests_init_temp_recieved, NULL);
+    MPI_Waitall(edges_request_count, requests_init_temp_recieved, MPI_STATUSES_IGNORE);
 
 
     // SENDING NEIGHBOUR VALUES TO BORDERS OF TILE FOR DOMAIN MAP
@@ -1128,7 +1127,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         MPI_Isend(&domain_map_local_with_borders[enlarged_tile_size_cols - 1 - 3], 1, tile_col_t, right_rank, FROM_LEFT_RANK_TAG_COL, MPI_COMM_WORLD, &requests_domain_map[num_requests++]);
     }
 
-    MPI_Waitall(total_request_count, requests_domain_map, NULL);
+    MPI_Waitall(total_request_count, requests_domain_map, MPI_STATUSES_IGNORE);
 
     if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && m_size >= sqrt(domain_length))
     {
@@ -1160,7 +1159,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
           MPI_Isend(&domain_map_local_with_borders_recieved[enlarged_tile_size_cols * 2], 1, tile_row_t, down_rank + out_size_cols, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_map_recieved_1D[num_requests++]);
       }
 
-      MPI_Waitall(rows_second_neighbor_request_count, requests_domain_map_recieved_1D, NULL);
+      MPI_Waitall(rows_second_neighbor_request_count, requests_domain_map_recieved_1D, MPI_STATUSES_IGNORE);
 
       domain_map_local_with_borders_recieved.clear();
       for (size_t i = 0; i < domain_map_local_with_borders_recieved_1D.size(); i++)
@@ -1224,7 +1223,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       MPI_Isend(&domain_map_local_with_borders_recieved[index_1D], 1, enlarge_tile_part_t, down_left_rank, FROM_UPPER_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_map_recieved[num_requests++]);
     }
 
-    MPI_Waitall(edges_request_count, requests_domain_map_recieved, NULL);
+    MPI_Waitall(edges_request_count, requests_domain_map_recieved, MPI_STATUSES_IGNORE);
 
     // SENDING NEIGHBOUR VALUES TO BORDERS OF TILE FOR DOMAIN PARAMS
     vector<float> domain_params_local_with_borders_recieved;
@@ -1276,7 +1275,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         MPI_Isend(&domain_params_local_with_borders[enlarged_tile_size_cols - 1 - 3], 1, tile_col_t, right_rank, FROM_LEFT_RANK_TAG_COL, MPI_COMM_WORLD, &requests_domain_params[num_requests++]);
     }
 
-    MPI_Waitall(total_request_count, requests_domain_params, NULL);
+    MPI_Waitall(total_request_count, requests_domain_params, MPI_STATUSES_IGNORE);
 
     if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && m_size >= sqrt(domain_length))
     {
@@ -1308,7 +1307,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
           MPI_Isend(&domain_params_local_with_borders_recieved[enlarged_tile_size_cols * 2], 1, tile_row_t, down_rank + out_size_cols, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_domain_params_recieved_1D[num_requests++]);
       }
 
-      MPI_Waitall(rows_second_neighbor_request_count, requests_domain_params_recieved_1D, NULL);
+      MPI_Waitall(rows_second_neighbor_request_count, requests_domain_params_recieved_1D, MPI_STATUSES_IGNORE);
 
       domain_params_local_with_borders_recieved.clear();
       for (size_t i = 0; i < domain_params_local_with_borders_recieved_1D.size(); i++)
@@ -1371,7 +1370,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       MPI_Isend(&domain_params_local_with_borders_recieved[index_1D], 1, enlarge_tile_part_t, down_left_rank, FROM_UPPER_RIGHT_RANK_TAG, MPI_COMM_WORLD, &requests_domain_params_recieved[num_requests++]);
     }
 
-    MPI_Waitall(edges_request_count, requests_domain_params, NULL);
+    MPI_Waitall(edges_request_count, requests_domain_params, MPI_STATUSES_IGNORE);
 
     /*
     // debug part of code for printing tile for each rank and see whether each rank has correct tile values
@@ -1502,6 +1501,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     //MPI_Gatherv(&workTempArrays[0][0], 1, worker_tile_t, &result_domain[0], counts, displacements, resized_farmer_matrix_t, 0, MPI_COMM_WORLD);
 
     // setting of paralel writing into output file
+    /*
     hid_t filespace;
     hid_t memspace;
     hid_t dataset;
@@ -1523,6 +1523,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         dataset = H5Dcreate(m_fileHandle, "result_domain_temperature", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Sselect_hyperslab(filespace, H5S_SELECT_SET, slabStart, nullptr, slabSize, nullptr);
     }
+    */
 
     /*
     if (m_rank == 0)
@@ -1617,7 +1618,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
           MPI_Isend(&workTempArrays[0][enlarged_tile_size_cols - 1 - 3], 1, tile_col_t, right_rank, FROM_LEFT_RANK_TAG_COL, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
         }
 
-        MPI_Waitall(total_request_count, requests_simulation, NULL);
+        MPI_Waitall(total_request_count, requests_simulation, MPI_STATUSES_IGNORE);
 
         // for 1D if m_size >= sqrt(domain_length): tile is not only send to borders to my upper or down rank but also to borders of neighbor's upper or down rank
         // borders are basically overlapping not two ranks as in 2D but three ranks, because size of border is 2 and size of actual tile is 1
@@ -1643,7 +1644,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
               MPI_Isend(&workTempArrays[0][enlarged_tile_size_cols * 2], 1, tile_row_t, down_rank + out_size_cols, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_simulation_1D[num_requests++]);
           }
 
-          MPI_Waitall(rows_second_neighbor_request_count, requests_simulation_1D, NULL);
+          MPI_Waitall(rows_second_neighbor_request_count, requests_simulation_1D, MPI_STATUSES_IGNORE);
         }
 
       }
@@ -1715,7 +1716,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       }
       */
 
-      float final_iteration_temp = 0.0f;
+      final_iteration_temp = 0.0f;
       // compute middle column temperature if rank is in communicator and holds middle column of domain
       if (count(middle_ranks.begin(), middle_ranks.end(), m_rank))
       {
@@ -1754,10 +1755,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       }
 
       // writing to output file during simulation
-      hid_t filespace_iteration;
-      hid_t memspace_iteration;
-      hid_t dataset_iteration;
-      hid_t xferPList_iteration;
       if (!m_simulationProperties.GetOutputFileName().empty())
       {
         // rank 0 gathers whole domain temp from all ranks (their tiles without borders) for sequentially saving into file
@@ -1779,46 +1776,44 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
             // when parallel writing is enabled
             else if (m_simulationProperties.IsUseParallelIO() && ((iter % m_simulationProperties.GetDiskWriteIntensity()) == 0))
             {
-              // create new separate file for result temperature of this iteration
-              string input_file_name = m_simulationProperties.GetOutputFileName("par");
-              string iteration_file_name = "";
-              iteration_file_name.append(input_file_name.substr(0,input_file_name.size() - 1 - 2));
-              iteration_file_name.append("_iteration_");
-              iteration_file_name.append(to_string(iter));
-              iteration_file_name.append(".h5");
 
-              hid_t access_property_list = H5Pcreate(H5P_FILE_ACCESS);
-              H5Pset_coll_metadata_write(access_property_list, true);
-              H5Pset_all_coll_metadata_ops(access_property_list, true);
+              hsize_t datasetSize[] = {hsize_t(sqrt(domain_length)), hsize_t(sqrt(domain_length))};
+              hsize_t memSize[]     = {hsize_t(local_tile_size_rows), hsize_t(local_tile_size_cols)};
+              hsize_t slabStart[] = {hsize_t(row_id * local_tile_size_rows), hsize_t(col_id * local_tile_size_cols)};
+              hsize_t slabSize[]  = {hsize_t(local_tile_size_rows), hsize_t(local_tile_size_cols)};
 
-              H5Pset_fapl_mpio(access_property_list, MPI_COMM_WORLD, MPI_INFO_NULL);
-              m_fileHandle_iteration.Set(H5Fcreate(iteration_file_name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, access_property_list), H5Fclose);
-              H5Pclose(access_property_list);
+              string groupName = "Timestep_" + std::to_string(static_cast<unsigned long long>(iter / m_simulationProperties.GetDiskWriteIntensity()));
+              AutoHandle<hid_t> groupHandle(H5Gcreate(m_fileHandle, groupName.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Gclose);
 
-              // get current temperatures in tile without their borders which are shared
-              float *tile_snapshot;
-              float tile_result[local_tile_size];
-              tile_snapshot = TrimTileWithoutBorders(&workTempArrays[0][0], enlarged_tile_size_rows, enlarged_tile_size_cols, tile_result);
-              //print_array(tile_snapshot, local_tile_size_rows, local_tile_size_cols);
+              {
+                string dataSetName("Temperature");
+                AutoHandle<hid_t> filespace(H5Screate_simple(2, datasetSize, nullptr), H5Sclose);
+                AutoHandle<hid_t> memspace(H5Screate_simple(2, memSize,     nullptr), H5Sclose);
 
-              string dataset_name = "";
-              dataset_name.append("iteration_");
-              dataset_name.append(to_string(iter));
+                AutoHandle<hid_t> dataset(H5Dcreate(groupHandle, dataSetName.c_str(), H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
 
-              // seting file for this iteration
-              filespace_iteration = H5Screate_simple(2, datasetSize, nullptr);
-              memspace_iteration  = H5Screate_simple(2, memSize,     nullptr);
 
-              xferPList_iteration = H5Pcreate(H5P_DATASET_XFER);
-              H5Pset_dxpl_mpio(xferPList_iteration, H5FD_MPIO_COLLECTIVE);
+                AutoHandle<hid_t> xferPList(H5Pcreate(H5P_DATASET_XFER), H5Pclose);
+                H5Pset_dxpl_mpio(xferPList, H5FD_MPIO_COLLECTIVE);
 
-              dataset_iteration = H5Dcreate(m_fileHandle_iteration, dataset_name.c_str(), H5T_NATIVE_FLOAT, filespace_iteration, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                H5Sselect_hyperslab(filespace, H5S_SELECT_SET, slabStart, nullptr, slabSize, nullptr);
 
-              H5Sselect_hyperslab(filespace_iteration, H5S_SELECT_SET, slabStart, nullptr, slabSize, nullptr);
-              // write to separate file this iteration
-              H5Dwrite(dataset_iteration, H5T_NATIVE_FLOAT, memspace_iteration, filespace_iteration, xferPList_iteration, &tile_snapshot[0]);
-              // write current temparature to file which name was input via command line
-              H5Dwrite(dataset, H5T_NATIVE_FLOAT, memspace, filespace, xferPList, &tile_snapshot[0]);
+                float *tile_snapshot;
+                float tile_result[local_tile_size];
+                tile_snapshot = TrimTileWithoutBorders(&workTempArrays[0][0], enlarged_tile_size_rows, enlarged_tile_size_cols, tile_result);
+                H5Dwrite(dataset, H5T_NATIVE_FLOAT, memspace, filespace, xferPList, &tile_snapshot[0]);
+              }
+
+              string attributeName("Time");
+
+              AutoHandle<hid_t> dataSpaceHandle(H5Screate(H5S_SCALAR), H5Sclose);
+
+              AutoHandle<hid_t> attributeHandle(H5Acreate2(groupHandle, attributeName.c_str(),
+                                                           H5T_IEEE_F64LE, dataSpaceHandle,
+                                                           H5P_DEFAULT, H5P_DEFAULT), H5Aclose);
+
+              double snapshotTime = double(iter);
+              H5Awrite(attributeHandle, H5T_IEEE_F64LE, &snapshotTime);
             }
 
       }
@@ -1830,11 +1825,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         PrintProgressReport(iter, final_iteration_temp);
       }
 
-      if (!m_simulationProperties.GetOutputFileName().empty() && m_simulationProperties.IsUseParallelIO() && ((iter % m_simulationProperties.GetDiskWriteIntensity()) == 0))
-      {
-        H5Dclose(dataset_iteration);
-      }
-
     } // end of simulation
 
     double simulation_end_time;
@@ -1843,11 +1833,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       simulation_end_time = MPI_Wtime();
       double simulation_duration = simulation_end_time - simulation_start_time;
       PrintFinalReport(simulation_duration, final_iteration_temp, "par");
-    }
-
-    if (!m_simulationProperties.GetOutputFileName().empty() && m_simulationProperties.IsUseParallelIO())
-    {
-      H5Dclose(dataset);
+      //cout << final_iteration_temp << endl;
     }
 
     // temperatures from all tiles are gathered in rank 0 and returned as outResult
