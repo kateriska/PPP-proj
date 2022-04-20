@@ -859,8 +859,9 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       total_request_count += 4;
     }
 
-    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_2D || (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && out_size_cols != 1))
+    if ((m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_2D && out_size_cols != 1) || (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && out_size_cols != 1))
     {
+      //cout << "Counting cols req" << endl;
       if (col_id == 0 || col_id == out_size_cols - 1)
       {
         total_request_count += 2;
@@ -873,8 +874,9 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     // counting of rank's requests during Isend and Irecv upper left, upper right, down left and down right corners
     int edges_request_count = 0;
-    if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_2D || (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && out_size_cols != 1))
+    if ((m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_2D && out_size_cols != 1) || (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && out_size_cols != 1))
     {
+      //cout << "Counting edges req" << endl;
       if ((row_id == 0 || row_id == out_size_rows - 1) && (col_id == 0 || col_id == out_size_cols - 1))
       {
         edges_request_count += 2;
