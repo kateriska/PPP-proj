@@ -2,9 +2,9 @@
 import csv
 import matplotlib.pyplot as plt
 
-suffixes=["_p2p", "_p2p_seq_IO", "_p2p_par_IO" ,"_rma", "_rma_seq_IO", "_rma_par_IO"] 
+suffixes=["_p2p", "_p2p_seq_IO", "_p2p_par_IO" ,"_rma", "_rma_seq_IO", "_rma_par_IO"]
 
-ploth_width  = 4 
+ploth_width  = 4
 ploth_height = 3
 legend_font_size = 6
 
@@ -46,7 +46,7 @@ for comm_type in ['p2p', 'rma']:
             plot_marker = "X"
         if key.find('4096') != -1:
             plot_marker = "d"
-        
+
         if key.find(comm_type) != -1:
             scaling_values      = data_series
             plt.plot(x_axis_points[0:len(scaling_values)], scaling_values, marker=plot_marker, label=key)
@@ -58,7 +58,7 @@ for comm_type in ['p2p', 'rma']:
     plt.legend( prop={'size': legend_font_size})
     plt.grid(True)
     plt.gca().set_position([0, 0, 1, 1])
-    plt.savefig("ppp_scaling_mpi_" + comm_type + ".svg")
+    plt.savefig("ppp_scaling_mpi_" + comm_type + ".svg", bbox_inches='tight')
 
     # speedup
     plt.figure(figsize=[ploth_width, ploth_height])
@@ -85,7 +85,7 @@ for comm_type in ['p2p', 'rma']:
     plt.ylabel('Speedup')
     plt.grid(True)
     plt.gca().set_position([0, 0, 1, 1])
-    plt.savefig("ppp_speedup_mpi_" + comm_type + ".svg")
+    plt.savefig("ppp_speedup_mpi_" + comm_type + ".svg", bbox_inches='tight')
 
     # efficiency
     plt.figure(figsize=[ploth_width, ploth_height])
@@ -110,14 +110,14 @@ for comm_type in ['p2p', 'rma']:
 
             plt.plot(x_axis_points[0:len(efficiency_values)], efficiency_values, marker=plot_marker, label=key)
 
-            
+
     plt.xlabel('Number of cores')
     plt.ylabel('Efficiency [%]')
     plt.legend(prop={'size': legend_font_size})
     plt.grid(True)
 #plt.show()
     plt.gca().set_position([0, 0, 1, 1])
-    plt.savefig("ppp_efficiency_mpi_" + comm_type + ".svg")
+    plt.savefig("ppp_efficiency_mpi_" + comm_type + ".svg", bbox_inches='tight')
 
 
 
@@ -160,7 +160,7 @@ for comm_type in ['p2p', 'rma']:
             plot_marker = "X"
         if key.find('4096') != -1:
             plot_marker = "d"
-        
+
         if key.find(comm_type) != -1:
             scaling_values      = data_series
             plt.plot(x_axis_points[0:len(scaling_values)], scaling_values, marker=plot_marker, label=key)
@@ -172,7 +172,7 @@ for comm_type in ['p2p', 'rma']:
     plt.legend(prop={'size': legend_font_size})
     plt.grid(True)
     plt.gca().set_position([0, 0, 1, 1])
-    plt.savefig("ppp_scaling_hybrid_" + comm_type + ".svg")
+    plt.savefig("ppp_scaling_hybrid_" + comm_type + ".svg", bbox_inches='tight')
 
     # speedup
     plt.figure(figsize=[ploth_width, ploth_height])
@@ -199,7 +199,7 @@ for comm_type in ['p2p', 'rma']:
     plt.ylabel('Speedup')
     plt.grid(True)
     plt.gca().set_position([0, 0, 1, 1])
-    plt.savefig("ppp_speedup_hybrid_" + comm_type + ".svg")
+    plt.savefig("ppp_speedup_hybrid_" + comm_type + ".svg", bbox_inches='tight')
 
     # efficiency
     plt.figure(figsize=[ploth_width, ploth_height])
@@ -224,13 +224,13 @@ for comm_type in ['p2p', 'rma']:
 
             plt.plot(x_axis_points[0:len(efficiency_values)], efficiency_values, marker=plot_marker, label=key)
 
-            
+
     plt.xlabel('Number of cores')
     plt.ylabel('Efficiency [%]')
     plt.legend(prop={'size': legend_font_size})
     plt.grid(True)
     plt.gca().set_position([0, 0, 1, 1])
-    plt.savefig("ppp_efficiency_hybrid_" + comm_type + ".svg")
+    plt.savefig("ppp_efficiency_hybrid_" + comm_type + ".svg", bbox_inches='tight')
 
 
 x_axis_points = [1, 2*9, 4*9, 8*9, 16*9, 32*9]
@@ -270,7 +270,7 @@ for comm_type in ['p2p', 'rma']:
             plot_marker = "X"
         if key.find('4096') != -1:
             plot_marker = "d"
-        
+
         if key.find(comm_type) != -1:
             scaling_values      = data_series
             plt.plot(x_axis_points[0:len(scaling_values)], scaling_values, marker=plot_marker, label=key)
@@ -282,7 +282,7 @@ for comm_type in ['p2p', 'rma']:
     plt.legend(prop={'size': legend_font_size})
     plt.grid(True)
     plt.gca().set_position([0, 0, 1, 1])
-    plt.savefig("ppp_scaling_hybrid_1D_" + comm_type + ".svg")
+    plt.savefig("ppp_scaling_hybrid_1D_" + comm_type + ".svg", bbox_inches='tight')
 
     # speedup
     plt.figure(figsize=[ploth_width, ploth_height])
@@ -309,7 +309,7 @@ for comm_type in ['p2p', 'rma']:
     plt.ylabel('Speedup')
     plt.grid(True)
     plt.gca().set_position([0, 0, 1, 1])
-    plt.savefig("ppp_speedup_hybrid_1D_" + comm_type + ".svg")
+    plt.savefig("ppp_speedup_hybrid_1D_" + comm_type + ".svg", bbox_inches='tight')
 
     # efficiency
     plt.figure(figsize=[ploth_width, ploth_height])
@@ -334,10 +334,10 @@ for comm_type in ['p2p', 'rma']:
 
             plt.plot(x_axis_points[0:len(efficiency_values)], efficiency_values, marker=plot_marker, label=key)
 
-            
+
     plt.xlabel('Number of cores')
     plt.ylabel('Efficiency [%]')
     plt.legend(prop={'size': legend_font_size})
     plt.grid(True)
     plt.gca().set_position([0, 0, 1, 1])
-    plt.savefig("ppp_efficiency_hybrid_1D_" + comm_type + ".svg")
+    plt.savefig("ppp_efficiency_hybrid_1D_" + comm_type + ".svg", bbox_inches='tight')

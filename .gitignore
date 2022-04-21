@@ -1,5 +1,5 @@
 ppp_proj_1/build/*
-ppp_proj_1/build/*
+ppp_proj_1/build_prof/*
 ppp_proj_1/scripts/input_data_256.h5
 ppp_proj_1/scripts/input_data_512.h5
 ppp_proj_1/scripts/input_data_1024.h5
