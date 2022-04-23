@@ -447,6 +447,29 @@ float* ParallelHeatSolver::TrimTileWithoutBorders(float* arr, int enlarged_tile_
   return result;
 }
 
+// edited implementation of BaseHeatSolver::UpdateTile with getting into account possible static edges of domain, which some rank can hold
+void ParallelHeatSolver::UpdateTileHybrid(const float *oldTemp, float *newTemp,
+                                const float *params, const int *map,
+                                size_t offset_rows_begin, size_t offset_rows_end,
+                                size_t offset_cols_begin, size_t offset_cols_end,
+                                size_t enlarged_tile_size_rows, size_t enlarged_tile_size_cols, float airFlowRate, float coolerTemp) const
+{
+    #pragma omp parallel for firstprivate(oldTemp, newTemp) default(shared)
+    for (size_t i = 2 + offset_rows_begin; i < enlarged_tile_size_rows - offset_rows_end - 2; ++i)
+    {
+        #pragma omp simd
+        for (size_t j = 2 + offset_cols_begin; j < enlarged_tile_size_cols - offset_cols_end - 2; ++j)
+        {
+            ComputePoint(oldTemp, newTemp,
+                    params,
+                    map,
+                    i, j, enlarged_tile_size_cols,
+                    airFlowRate,
+                    coolerTemp);
+        }
+    }
+}
+
 void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > &outResult)
 {
     // UpdateTile(...) method can be used to evaluate heat equation over 2D tile
@@ -1438,19 +1461,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     for (size_t iter = 0; iter < m_simulationProperties.GetNumIterations(); ++iter)
     {
       // compute tile
-      for(size_t i = 2 + offset_rows_begin; i < enlarged_tile_size_rows - offset_rows_end - 2; ++i)
-      {
-            for(size_t j = 2 + offset_cols_begin; j < enlarged_tile_size_cols - offset_cols_end - 2; ++j)
-            {
-                ComputePoint(workTempArrays[1], workTempArrays[0],
-                        domain_params_local_with_borders_recieved_with_edges.data(),
-                        domain_map_local_with_borders_recieved_with_edges.data(),
-                        i, j,
-                        enlarged_tile_size_cols,
-                        m_simulationProperties.GetAirFlowRate(),
-                        m_materialProperties.GetCoolerTemp());
-            }
-      }
+      UpdateTileHybrid(workTempArrays[1], workTempArrays[0], domain_params_local_with_borders_recieved_with_edges.data(), domain_map_local_with_borders_recieved_with_edges.data(), offset_rows_begin, offset_rows_end, offset_cols_begin, offset_cols_end, enlarged_tile_size_rows, enlarged_tile_size_cols, m_simulationProperties.GetAirFlowRate(), m_materialProperties.GetCoolerTemp());
 
       // change tile borders in p2p mode
       if (m_simulationProperties.IsRunParallelP2P())

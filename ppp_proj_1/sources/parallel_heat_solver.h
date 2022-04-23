@@ -79,6 +79,7 @@ public:
     float ComputeMiddleColAvgTemp(const float *data, int enlarged_tile_size_rows, int enlarged_tile_size_cols, int middle_item_tile_col_id) const;
     int count_1D_index(int row, int length_of_row, int column);
     float* TrimTileWithoutBorders(float* arr, int enlarged_tile_size_rows, int enlarged_tile_size_cols, float* result);
+    void UpdateTileHybrid(const float *oldTemp, float *newTemp, const float *params, const int *map, size_t offset_rows_begin, size_t offset_rows_end, size_t offset_cols_begin, size_t offset_cols_end, size_t enlarged_tile_size_rows, size_t enlarged_tile_size_cols, float airFlowRate, float coolerTemp) const;
 
 
 
