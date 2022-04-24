@@ -1,0 +1,79 @@
+
+mpi_procs;grid_tiles_x;grid_tiles_y;omp_threads;domain_size;n_iterations;disk_write_intensity;airflow;material_file;output_file;simulation_mode;middle_col_avg_temp;total_time;iteration_time
+16;16;1;6;1024;100;50;0.001;/home/training/dd-21-22-303/PPP-barbora/scripts/input_data_1024.h5;;par;21.0252;0.0898085;0.000898085
+16;4;4;6;1024;100;50;0.001;/home/training/dd-21-22-303/PPP-barbora/scripts/input_data_1024.h5;;par;20.9843;0.0875819;0.000875819
+[1650650560.868491] [cn171:1923300:0]          mpool.c:42   UCX  WARN  object 0x1963d00 was not returned to mpool ucp_requests
+[1650650560.868511] [cn171:1923300:0]          mpool.c:42   UCX  WARN  object 0x1963ec0 was not returned to mpool ucp_requests
+[1650650560.869012] [cn171:1923294:0]          mpool.c:42   UCX  WARN  object 0x2bc6d00 was not returned to mpool ucp_requests
+[1650650560.869025] [cn171:1923294:0]          mpool.c:42   UCX  WARN  object 0x2bc6ec0 was not returned to mpool ucp_requests
+[1650650560.878637] [cn171:1923295:0]          mpool.c:42   UCX  WARN  object 0x2912d00 was not returned to mpool ucp_requests
+[1650650560.878654] [cn171:1923295:0]          mpool.c:42   UCX  WARN  object 0x2912ec0 was not returned to mpool ucp_requests
+[1650650560.880409] [cn171:1923301:0]          mpool.c:42   UCX  WARN  object 0x2aa7d00 was not returned to mpool ucp_requests
+[1650650560.880423] [cn171:1923301:0]          mpool.c:42   UCX  WARN  object 0x2aa7ec0 was not returned to mpool ucp_requests
+[1650650560.887582] [cn171:1923288:0]          mpool.c:42   UCX  WARN  object 0x1ea3d00 was not returned to mpool ucp_requests
+[1650650560.887597] [cn171:1923288:0]          mpool.c:42   UCX  WARN  object 0x1ea3ec0 was not returned to mpool ucp_requests
+[1650650560.889388] [cn171:1923290:0]          mpool.c:42   UCX  WARN  object 0x214ed00 was not returned to mpool ucp_requests
+[1650650560.891034] [cn171:1923298:0]          mpool.c:42   UCX  WARN  object 0x2902d00 was not returned to mpool ucp_requests
+[1650650560.891047] [cn171:1923298:0]          mpool.c:42   UCX  WARN  object 0x2902ec0 was not returned to mpool ucp_requests
+[1650650560.891241] [cn171:1923297:0]          mpool.c:42   UCX  WARN  object 0x1d73980 was not returned to mpool ucp_requests
+[1650650560.891255] [cn171:1923297:0]          mpool.c:42   UCX  WARN  object 0x1d73b40 was not returned to mpool ucp_requests
+[1650650560.891259] [cn171:1923297:0]          mpool.c:42   UCX  WARN  object 0x1d73d00 was not returned to mpool ucp_requests
+[1650650560.891263] [cn171:1923297:0]          mpool.c:42   UCX  WARN  object 0x1d73ec0 was not returned to mpool ucp_requests
+[1650650560.891659] [cn171:1923303:0]          mpool.c:42   UCX  WARN  object 0x1afbd00 was not returned to mpool ucp_requests
+[1650650560.891824] [cn171:1923299:0]          mpool.c:42   UCX  WARN  object 0x1b12d00 was not returned to mpool ucp_requests
+[1650650560.891976] [cn171:1923289:0]          mpool.c:42   UCX  WARN  object 0x30fed00 was not returned to mpool ucp_requests
+[1650650560.891990] [cn171:1923289:0]          mpool.c:42   UCX  WARN  object 0x30feec0 was not returned to mpool ucp_requests
+[1650650560.892257] [cn171:1923296:0]          mpool.c:42   UCX  WARN  object 0x295e980 was not returned to mpool ucp_requests
+[1650650560.892269] [cn171:1923296:0]          mpool.c:42   UCX  WARN  object 0x295eb40 was not returned to mpool ucp_requests
+[1650650560.892273] [cn171:1923296:0]          mpool.c:42   UCX  WARN  object 0x295ed00 was not returned to mpool ucp_requests
+[1650650560.892277] [cn171:1923296:0]          mpool.c:42   UCX  WARN  object 0x295eec0 was not returned to mpool ucp_requests
+[1650650560.892584] [cn171:1923287:0]          mpool.c:42   UCX  WARN  object 0x213cd00 was not returned to mpool ucp_requests
+[1650650560.892698] [cn171:1923293:0]          mpool.c:42   UCX  WARN  object 0x347a980 was not returned to mpool ucp_requests
+[1650650560.892712] [cn171:1923293:0]          mpool.c:42   UCX  WARN  object 0x347ab40 was not returned to mpool ucp_requests
+[1650650560.892716] [cn171:1923293:0]          mpool.c:42   UCX  WARN  object 0x347ad00 was not returned to mpool ucp_requests
+[1650650560.892719] [cn171:1923293:0]          mpool.c:42   UCX  WARN  object 0x347aec0 was not returned to mpool ucp_requests
+[1650650560.892873] [cn171:1923292:0]          mpool.c:42   UCX  WARN  object 0x2063980 was not returned to mpool ucp_requests
+[1650650560.892887] [cn171:1923292:0]          mpool.c:42   UCX  WARN  object 0x2063b40 was not returned to mpool ucp_requests
+[1650650560.892893] [cn171:1923292:0]          mpool.c:42   UCX  WARN  object 0x2063d00 was not returned to mpool ucp_requests
+[1650650560.892896] [cn171:1923292:0]          mpool.c:42   UCX  WARN  object 0x2063ec0 was not returned to mpool ucp_requests
+[1650650560.893031] [cn171:1923291:0]          mpool.c:42   UCX  WARN  object 0x18cbd00 was not returned to mpool ucp_requests
+[1650650560.893045] [cn171:1923291:0]          mpool.c:42   UCX  WARN  object 0x18cbec0 was not returned to mpool ucp_requests
+mpi_procs;grid_tiles_x;grid_tiles_y;omp_threads;domain_size;n_iterations;disk_write_intensity;airflow;material_file;output_file;simulation_mode;middle_col_avg_temp;total_time;iteration_time
+16;16;1;6;1024;100;50;0.001;/home/training/dd-21-22-303/PPP-barbora/scripts/input_data_1024.h5;;par;21.0252;0.0896798;0.000896798
+16;4;4;6;1024;100;50;0.001;/home/training/dd-21-22-303/PPP-barbora/scripts/input_data_1024.h5;;par;20.9843;0.0881681;0.000881681
+[1650650563.288185] [cn171:1923436:0]          mpool.c:42   UCX  WARN  object 0x3158d00 was not returned to mpool ucp_requests
+[1650650563.288202] [cn171:1923436:0]          mpool.c:42   UCX  WARN  object 0x3158ec0 was not returned to mpool ucp_requests
+[1650650563.289950] [cn171:1923432:0]          mpool.c:42   UCX  WARN  object 0x22049c0 was not returned to mpool ucp_requests
+[1650650563.289963] [cn171:1923432:0]          mpool.c:42   UCX  WARN  object 0x2204b80 was not returned to mpool ucp_requests
+[1650650563.289968] [cn171:1923432:0]          mpool.c:42   UCX  WARN  object 0x2204d40 was not returned to mpool ucp_requests
+[1650650563.289972] [cn171:1923432:0]          mpool.c:42   UCX  WARN  object 0x2204f00 was not returned to mpool ucp_requests
+[1650650563.292121] [cn171:1923431:0]          mpool.c:42   UCX  WARN  object 0x2f04d00 was not returned to mpool ucp_requests
+[1650650563.292136] [cn171:1923431:0]          mpool.c:42   UCX  WARN  object 0x2f04ec0 was not returned to mpool ucp_requests
+[1650650563.295594] [cn171:1923430:0]          mpool.c:42   UCX  WARN  object 0x31d6d00 was not returned to mpool ucp_requests
+[1650650563.295608] [cn171:1923430:0]          mpool.c:42   UCX  WARN  object 0x31d6ec0 was not returned to mpool ucp_requests
+[1650650563.297522] [cn171:1923438:0]          mpool.c:42   UCX  WARN  object 0x20bfd00 was not returned to mpool ucp_requests
+[1650650563.298346] [cn171:1923425:0]          mpool.c:42   UCX  WARN  object 0x1e85d00 was not returned to mpool ucp_requests
+[1650650563.298360] [cn171:1923425:0]          mpool.c:42   UCX  WARN  object 0x1e85ec0 was not returned to mpool ucp_requests
+[1650650563.298715] [cn171:1923437:0]          mpool.c:42   UCX  WARN  object 0x1a72d00 was not returned to mpool ucp_requests
+[1650650563.298727] [cn171:1923437:0]          mpool.c:42   UCX  WARN  object 0x1a72ec0 was not returned to mpool ucp_requests
+[1650650563.298741] [cn171:1923433:0]          mpool.c:42   UCX  WARN  object 0x1d5a980 was not returned to mpool ucp_requests
+[1650650563.298753] [cn171:1923433:0]          mpool.c:42   UCX  WARN  object 0x1d5ab40 was not returned to mpool ucp_requests
+[1650650563.298758] [cn171:1923433:0]          mpool.c:42   UCX  WARN  object 0x1d5ad00 was not returned to mpool ucp_requests
+[1650650563.298762] [cn171:1923433:0]          mpool.c:42   UCX  WARN  object 0x1d5aec0 was not returned to mpool ucp_requests
+[1650650563.299229] [cn171:1923429:0]          mpool.c:42   UCX  WARN  object 0x1c47980 was not returned to mpool ucp_requests
+[1650650563.299243] [cn171:1923429:0]          mpool.c:42   UCX  WARN  object 0x1c47b40 was not returned to mpool ucp_requests
+[1650650563.299247] [cn171:1923429:0]          mpool.c:42   UCX  WARN  object 0x1c47d00 was not returned to mpool ucp_requests
+[1650650563.299251] [cn171:1923429:0]          mpool.c:42   UCX  WARN  object 0x1c47ec0 was not returned to mpool ucp_requests
+[1650650563.299408] [cn171:1923424:0]          mpool.c:42   UCX  WARN  object 0x23add00 was not returned to mpool ucp_requests
+[1650650563.299421] [cn171:1923424:0]          mpool.c:42   UCX  WARN  object 0x23adec0 was not returned to mpool ucp_requests
+[1650650563.299725] [cn171:1923426:0]          mpool.c:42   UCX  WARN  object 0x3307d00 was not returned to mpool ucp_requests
+[1650650563.299763] [cn171:1923428:0]          mpool.c:42   UCX  WARN  object 0x2a37980 was not returned to mpool ucp_requests
+[1650650563.299775] [cn171:1923428:0]          mpool.c:42   UCX  WARN  object 0x2a37b40 was not returned to mpool ucp_requests
+[1650650563.299780] [cn171:1923428:0]          mpool.c:42   UCX  WARN  object 0x2a37d00 was not returned to mpool ucp_requests
+[1650650563.299784] [cn171:1923428:0]          mpool.c:42   UCX  WARN  object 0x2a37ec0 was not returned to mpool ucp_requests
+[1650650563.299828] [cn171:1923434:0]          mpool.c:42   UCX  WARN  object 0x1c48d00 was not returned to mpool ucp_requests
+[1650650563.299841] [cn171:1923434:0]          mpool.c:42   UCX  WARN  object 0x1c48ec0 was not returned to mpool ucp_requests
+[1650650563.300197] [cn171:1923435:0]          mpool.c:42   UCX  WARN  object 0x1d4ad00 was not returned to mpool ucp_requests
+[1650650563.300509] [cn171:1923427:0]          mpool.c:42   UCX  WARN  object 0x3064d00 was not returned to mpool ucp_requests
+[1650650563.300521] [cn171:1923427:0]          mpool.c:42   UCX  WARN  object 0x3064ec0 was not returned to mpool ucp_requests
+[1650650563.300977] [cn171:1923423:0]          mpool.c:42   UCX  WARN  object 0x2ed0d00 was not returned to mpool ucp_requests

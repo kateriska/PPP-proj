@@ -483,9 +483,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     // Finally "PrintFinalReport(...)" should be used to print final elapsed time and
     // average temperature in column.
-    //std::vector<float> local_a(local_size);
-      //local_a.reserve(local_size);
-    //std::vector<float> loca_b(local_size);
 
     int out_size_cols;
     int out_size_rows;
