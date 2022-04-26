@@ -1,6 +1,6 @@
 import h5py
 
-filename = '/home/katerina/Documents/PPP-proj/ppp_proj_1/build/outh_par.h5'
+filename = '/home/katerina/Documents/PPP-proj/ppp_proj_1/build/file_h_seq.h5'
 data = h5py.File(filename, 'r')
 for group in data.keys() :
     print (group)
