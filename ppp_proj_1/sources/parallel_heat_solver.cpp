@@ -13,7 +13,6 @@ using namespace std;
 
 #define FROM_DOWN_RANK_TAG_ROW 1
 #define FROM_UPPER_RANK_TAG_ROW 2
-
 #define FROM_LEFT_RANK_TAG_COL 3
 #define FROM_RIGHT_RANK_TAG_COL 4
 
@@ -96,7 +95,6 @@ ParallelHeatSolver::ParallelHeatSolver(SimulationProperties &simulationProps,
       m_fileHandle.Set(H5Fcreate(simulationProps.GetOutputFileName("par").c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, access_property_list), H5Fclose);
       H5Pclose(access_property_list);
     }
-
 }
 
 ParallelHeatSolver::~ParallelHeatSolver()
@@ -192,8 +190,7 @@ vector<int> ParallelHeatSolver::EnlargeTile(list<vector<int>> input_list, int lo
   list<vector<int>> enlarged_list;
 
   for (auto vect : input_list) {
-      // Each element of the list is
-      // a vector itself
+
       vector<int> currentVector = vect;
 
       currentVector.insert(currentVector.begin(), 0);
@@ -209,10 +206,8 @@ vector<int> ParallelHeatSolver::EnlargeTile(list<vector<int>> input_list, int lo
   enlarged_list.push_back(zeros_vector);
   enlarged_list.push_back(zeros_vector);
 
-
   for (auto vect : enlarged_list) {
-      // Each element of the list is
-      // a vector itself
+
       vector<int> currentVector = vect;
       for (size_t i = 0; i < currentVector.size(); ++i)
       {
@@ -229,7 +224,6 @@ vector<int> ParallelHeatSolver::EnlargeTile(list<vector<int>> input_list, int lo
       cout << '\n';
       */
   }
-
   return output_vector_with_borders;
 }
 
@@ -238,8 +232,7 @@ vector<float> ParallelHeatSolver::EnlargeTile(list<vector<float>> input_list, in
   vector<float> output_vector_with_borders;
   list<vector<float>> enlarged_list;
   for (auto vect : input_list) {
-      // Each element of the list is
-      // a vector itself
+
       vector<float> currentVector = vect;
 
       currentVector.insert(currentVector.begin(), 0);
@@ -255,10 +248,8 @@ vector<float> ParallelHeatSolver::EnlargeTile(list<vector<float>> input_list, in
   enlarged_list.push_back(zeros_vector);
   enlarged_list.push_back(zeros_vector);
 
-
   for (auto vect : enlarged_list) {
-      // Each element of the list is
-      // a vector itself
+
       vector<float> currentVector = vect;
       for (size_t i = 0; i < currentVector.size(); ++i)
       {
@@ -275,7 +266,6 @@ vector<float> ParallelHeatSolver::EnlargeTile(list<vector<float>> input_list, in
       cout << '\n';
       */
   }
-
   return output_vector_with_borders;
 }
 
@@ -319,10 +309,8 @@ vector<int> ParallelHeatSolver::Enlarge1DTile(int *input_arr, int local_tile_siz
   enlarged_list.push_back(zeros_vector);
   enlarged_list.push_back(zeros_vector);
 
-
   for (auto vect : enlarged_list) {
-      // Each element of the list is
-      // a vector itself
+
       vector<int> currentVector = vect;
       for (size_t i = 0; i < currentVector.size(); ++i)
       {
@@ -340,8 +328,6 @@ vector<int> ParallelHeatSolver::Enlarge1DTile(int *input_arr, int local_tile_siz
       cout << '\n';
       */
   }
-
-
   return output_vector_with_borders;
 }
 
@@ -371,10 +357,8 @@ vector<float> ParallelHeatSolver::Enlarge1DTile(float *input_arr, int local_tile
   enlarged_list.push_back(zeros_vector);
   enlarged_list.push_back(zeros_vector);
 
-
   for (auto vect : enlarged_list) {
-      // Each element of the list is
-      // a vector itself
+
       vector<float> currentVector = vect;
       for (size_t i = 0; i < currentVector.size(); ++i)
       {
@@ -391,10 +375,8 @@ vector<float> ParallelHeatSolver::Enlarge1DTile(float *input_arr, int local_tile
       cout << '\n';
       */
   }
-
   return output_vector_with_borders;
 }
-
 
 // debug function for printing 1D array in visual form of 2D array
 void ParallelHeatSolver::print_array(int* arr, int width, int height)
@@ -434,9 +416,9 @@ int ParallelHeatSolver::count_1D_index(int row, int length_of_row, int column)
 float* ParallelHeatSolver::TrimTileWithoutBorders(float* arr, int enlarged_tile_size_rows, int enlarged_tile_size_cols, float* result)
 {
   int result_index = 0;
-  for(size_t i = 2; i < enlarged_tile_size_rows - 2; ++i)
+  for (size_t i = 2; i < enlarged_tile_size_rows - 2; ++i)
   {
-        for(size_t j = 2; j < enlarged_tile_size_cols - 2; ++j)
+        for (size_t j = 2; j < enlarged_tile_size_cols - 2; ++j)
         {
             int index_1D = count_1D_index(i, enlarged_tile_size_cols, j);
             result[result_index] = arr[index_1D];
@@ -494,7 +476,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     if (m_rank == 0)
     {
       m_simulationProperties.GetDecompGrid(out_size_cols, out_size_rows);
-
       local_tile_size_cols = sqrt(m_materialProperties.GetInitTemp().size()) / out_size_cols;
       local_tile_size_rows = sqrt(m_materialProperties.GetInitTemp().size()) / out_size_rows;
       local_tile_size = local_tile_size_cols * local_tile_size_rows;
@@ -607,11 +588,9 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         int value = m_materialProperties.GetDomainMap().at(i);
         domain_map.push_back(value);
       }
-
     }
 
     int m_num;
-
     MPI_Comm_size(MPI_COMM_WORLD, &m_num);
     int displacements[m_num];
     int counts[m_num];
@@ -1420,7 +1399,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     tile[1] = local_tile_size_cols;
     worker_start[0] = 2; // cut borders of size of 2
     worker_start[1] = 2;
-    float result_domain[domain_length]; // result of whole domain temperature to write by rank 0 sequentially to file
 
     MPI_Type_create_subarray(2, worker_size, tile, worker_start, MPI_ORDER_C, MPI_FLOAT, &worker_tile_t);
     MPI_Type_commit(&worker_tile_t);
@@ -1443,9 +1421,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     int iteration_offset = 0; // offset of iteration when using RMA
 
-    /*
-    ACTUAL SIMULATION
-    */
+    // ACTUAL SIMULATION
     double simulation_start_time;
     if (m_rank == 0)
     {
@@ -1534,9 +1510,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
           MPI_Waitall(rows_second_neighbor_request_count, requests_simulation_1D, MPI_STATUSES_IGNORE);
         }
-
       }
-
       else // change tile borders in rma mode
       {
         int offset = enlarged_tile_size * iteration_offset;
@@ -1595,7 +1569,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       // compute middle column temperature if rank is in communicator and holds middle column of domain
       if (count(middle_ranks.begin(), middle_ranks.end(), m_rank))
       {
-
         if (m_rank == 0 && out_size_cols != 1) // when rank 0 doesnt hold some values from middle column
         {
           middleColAvgTemp = 0.0f;
@@ -1622,7 +1595,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
             float item = all_average_temp.at(i);
             all_average_temp_sum += item;
           }
-
           final_iteration_temp = all_average_temp_sum / (all_average_temp.size() - 1);
         }
       }
@@ -1642,7 +1614,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
             // when parallel writing is enabled
             else if (m_simulationProperties.IsUseParallelIO() && ((iter % m_simulationProperties.GetDiskWriteIntensity()) == 0))
             {
-
               hsize_t datasetSize[] = {hsize_t(sqrt(domain_length)), hsize_t(sqrt(domain_length))};
               hsize_t memSize[]     = {hsize_t(local_tile_size_rows), hsize_t(local_tile_size_cols)};
               hsize_t slabStart[] = {hsize_t(row_id * local_tile_size_rows), hsize_t(col_id * local_tile_size_cols)};
@@ -1650,14 +1621,12 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
               string groupName = "Timestep_" + std::to_string(static_cast<unsigned long long>(iter / m_simulationProperties.GetDiskWriteIntensity()));
               AutoHandle<hid_t> groupHandle(H5Gcreate(m_fileHandle, groupName.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Gclose);
-
               {
                 string dataSetName("Temperature");
                 AutoHandle<hid_t> filespace(H5Screate_simple(2, datasetSize, nullptr), H5Sclose);
                 AutoHandle<hid_t> memspace(H5Screate_simple(2, memSize,     nullptr), H5Sclose);
 
                 AutoHandle<hid_t> dataset(H5Dcreate(groupHandle, dataSetName.c_str(), H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-
 
                 AutoHandle<hid_t> xferPList(H5Pcreate(H5P_DATASET_XFER), H5Pclose);
                 H5Pset_dxpl_mpio(xferPList, H5FD_MPIO_COLLECTIVE);
@@ -1671,9 +1640,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
               }
 
               string attributeName("Time");
-
               AutoHandle<hid_t> dataSpaceHandle(H5Screate(H5S_SCALAR), H5Sclose);
-
               AutoHandle<hid_t> attributeHandle(H5Acreate2(groupHandle, attributeName.c_str(),
                                                            H5T_IEEE_F64LE, dataSpaceHandle,
                                                            H5P_DEFAULT, H5P_DEFAULT), H5Aclose);
@@ -1681,7 +1648,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
               double snapshotTime = double(iter);
               H5Awrite(attributeHandle, H5T_IEEE_F64LE, &snapshotTime);
             }
-
       }
 
       swap(workTempArrays[0], workTempArrays[1]);
@@ -1690,7 +1656,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       {
         PrintProgressReport(iter, final_iteration_temp);
       }
-
     } // end of simulation
 
     double simulation_end_time;
@@ -1720,7 +1685,6 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     {
       MPI_Comm_free(&MPI_COMM_MIDDLE_COLUMN);
     }
-
     MPI_Group_free(&WORLD_GROUP);
     MPI_Group_free(&MIDDLE_COLUMN_GROUP);
 }
@@ -1730,7 +1694,6 @@ float ParallelHeatSolver::ComputeMiddleColAvgTemp(const float *data, int enlarge
 {
     float middleColAvgTemp = 0.0f;
     float result = 0.0f;
-
     // index of column which will have influence on middle temperature (index computed for tile + 2 because of enlarged borders)
     int middle_column_tile_id = 2 + middle_item_tile_col_id;
 
@@ -1739,7 +1702,6 @@ float ParallelHeatSolver::ComputeMiddleColAvgTemp(const float *data, int enlarge
         for(size_t j = 2; j < enlarged_tile_size_cols - 2; ++j)
         {
             int index_1D = i * enlarged_tile_size_cols + j;
-
             int row_id = index_1D / enlarged_tile_size_cols;
             int col_id = index_1D % enlarged_tile_size_cols;
 
@@ -1751,7 +1713,6 @@ float ParallelHeatSolver::ComputeMiddleColAvgTemp(const float *data, int enlarge
             }
         }
     }
-
     result = middleColAvgTemp / (enlarged_tile_size_rows - 4);
     return result;
 }
