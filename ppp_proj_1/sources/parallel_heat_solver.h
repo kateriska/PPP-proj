@@ -67,7 +67,6 @@ public:
      */
     virtual void RunSolver(std::vector<float, AlignedAllocator<float> > &outResult);
 
-    //vector<float> ParallelHeatSolver::SplitVector(vector<float> input_vector, int n, int size)
     void print_array(int* arr, int width, int height);
     void print_array(float* arr, int width, int height);
     list<vector<int>> SplitRows(int *input_arr, int local_tile_size, int local_tile_size_cols);

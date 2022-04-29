@@ -677,7 +677,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
 
     vector<int> middle_ranks;
 
-    // FIND RANKS THAT HOLDS MIDDLE COLUMN OF BOARD AND CREATE NEW COMMUNICATOR FOR THEM
+    // FIND RANKS THAT HOLD MIDDLE COLUMN OF BOARD AND CREATE NEW COMMUNICATOR FOR THEM
     int middle_item_col_id = (sqrt(domain_length) / 2); // middle column of values
     int middle_item_tile_col_id = middle_item_col_id % local_tile_size_cols; // index of middle column of values in their tile
     int middle_col_id = middle_item_col_id / local_tile_size_cols; // column of ranks that will be in special communicator
@@ -1378,7 +1378,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       offset_cols_end += 2;
     }
 
-    // specially for 1D decomposition if m_size >= sqrt(domain_length) cause not only first and last row ranks but also second and last but one (predposledni) ranks contains static border corners
+    // specially for 1D decomposition if m_size >= sqrt(domain_length) cause not only first and last row ranks but also second and last but one (predposledni) ranks contain static border corners
     if (m_simulationProperties.GetDecompMode() == SimulationProperties::DECOMP_MODE_1D && row_id - 1 == 0 && m_size >= sqrt(domain_length))
     {
       offset_rows_begin += 1;
@@ -1454,10 +1454,12 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         }
         if (col_id != out_size_cols - 1)
         {
+          // store to last two columns
           MPI_Irecv(&workTempArrays[1][enlarged_tile_size_cols - 1 - 1], 1, tile_col_t, right_rank, FROM_RIGHT_RANK_TAG_COL, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
         }
         if (col_id != 0)
         {
+          // store to first two columns
           MPI_Irecv(&workTempArrays[1][0], 1, tile_col_t, left_rank, FROM_LEFT_RANK_TAG_COL, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
         }
 
@@ -1468,7 +1470,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         }
         if (row_id != out_size_rows - 1)
         {
-          // send two rows down
+          // send two rows down from upper rank
           MPI_Isend(&workTempArrays[0][enlarged_tile_size_cols * (enlarged_tile_size_rows - 1 - 3)], 2, tile_row_t, down_rank, FROM_UPPER_RANK_TAG_ROW, MPI_COMM_WORLD, &requests_simulation[num_requests_simulation++]);
         }
         if (col_id != 0)
@@ -1566,7 +1568,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
       }
 
       final_iteration_temp = 0.0f;
-      // compute middle column temperature if rank is in communicator and holds middle column of domain
+      // compute middle column temperature if rank is in special communicator and holds middle column of domain
       if (count(middle_ranks.begin(), middle_ranks.end(), m_rank))
       {
         if (m_rank == 0 && out_size_cols != 1) // when rank 0 doesnt hold some values from middle column
