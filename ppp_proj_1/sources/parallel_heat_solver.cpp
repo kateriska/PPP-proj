@@ -1335,11 +1335,19 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
     MPI_Win_allocate(2 * enlarged_tile_size * sizeof(float), sizeof(float), MPI_INFO_NULL, MPI_COMM_WORLD, &win_memory, &win);
 
     float *workTempArrays[2];
+
+    vector<float> init_temp_local_with_borders_recieved_with_edges_res;
+
+    for (size_t i = 0; i < init_temp_local_with_borders_recieved_with_edges.size(); i++)
+    {
+      float value = init_temp_local_with_borders_recieved_with_edges.at(i);
+      init_temp_local_with_borders_recieved_with_edges_res.push_back(value);
+    }
     // init arrays for new and old values
     if (m_simulationProperties.IsRunParallelP2P())
     {
       workTempArrays[0] = init_temp_local_with_borders_recieved_with_edges.data();
-      workTempArrays[1] = init_temp_local_with_borders_recieved_with_edges.data();
+      workTempArrays[1] = init_temp_local_with_borders_recieved_with_edges_res.data();
     }
     else if (m_simulationProperties.IsRunParallelRMA())
     {
