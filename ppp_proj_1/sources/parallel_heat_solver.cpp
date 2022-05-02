@@ -610,7 +610,7 @@ void ParallelHeatSolver::RunSolver(std::vector<float, AlignedAllocator<float> > 
         }
         else
         {
-          res = res + local_tile_size_cols;
+          res = res + (local_tile_size_cols * local_tile_size_rows);
         }
         displacements[x] = res;
       }
